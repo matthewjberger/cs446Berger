@@ -2,8 +2,9 @@
 #define _UTILITIES_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 // Utility Functions
-void HandleArgs(int argc, char* argv[]);
+bool HandleArgs(int argc, int numberOfArgs);
 
 #endif
