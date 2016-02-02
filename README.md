@@ -1,1 +1,1 @@
-# cs446Berger
+# CS446 - Principles of Operating Systems

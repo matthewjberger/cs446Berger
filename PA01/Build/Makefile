@@ -2,6 +2,9 @@
 # Makefile Settings                                       #
 ###########################################################
 
+# Suppress output except for errors and warnings
+.SILENT:
+
 # Executable name
 EXE_NAME = family
 
