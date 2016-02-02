@@ -3,7 +3,7 @@
 ###########################################################
 
 # Executable name
-EXE_NAME = Project1
+EXE_NAME = family
 
 # Compiler flags
 COMPILER_FLAGS= -Wall
