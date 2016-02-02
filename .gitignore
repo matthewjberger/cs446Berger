@@ -1,33 +1,36 @@
-### https://raw.github.com/github/gitignore/fa441f903154d8159ef71db23d4816d802450fef/C++.gitignore
+### https://raw.github.com/github/gitignore/fa441f903154d8159ef71db23d4816d802450fef/C.gitignore
 
-# Compiled Object files
-*.slo
-*.lo
+# Object files
 *.o
+*.ko
 *.obj
+*.elf
 
 # Precompiled Headers
 *.gch
 *.pch
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
+# Libraries
 *.lib
+*.a
+*.la
+*.lo
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
 
 # Executables
 *.exe
 *.out
 *.app
+*.i*86
+*.x86_64
+*.hex
 
-# Output directories
-Bin/
+# Debug files
+*.dSYM/
+
+
