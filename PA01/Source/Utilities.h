@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 
 // Utility Functions
 bool HandleArgs(int argc, int numberOfArgs);
