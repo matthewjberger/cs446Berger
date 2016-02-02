@@ -33,4 +33,6 @@
 # Debug files
 *.dSYM/
 
-
+# Output directories
+Bin/
+Bin/*

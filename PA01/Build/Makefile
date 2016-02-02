@@ -6,7 +6,7 @@
 EXE_NAME = Project1
 
 # Compiler flags
-COMPILER_FLAGS= -Wall -std=c++11
+COMPILER_FLAGS= -Wall
 
 # Compiler being used
 CC = gcc
