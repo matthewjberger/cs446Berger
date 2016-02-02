@@ -36,7 +36,7 @@ LIBRARY_PATHS =
 LINKER_FLAGS =
 
 # Files/Directories to copy to output directory
-OUT_FILES = $(SRC_DIR)/Data
+OUT_FILES = $(SRC_DIR)/Data/
 
 ###########################################################
 # Build System                                            #
