@@ -21,6 +21,7 @@ int main(int argc, char *argv[])
     // Number of tabs for formatting
     int numberOfTabs = 0;
 
+    // Get the first line of the file
     if(fgets(lineBuffer, sizeof(lineBuffer), file))
     {
         // FIRST TIER
@@ -52,6 +53,9 @@ int main(int argc, char *argv[])
                 bool foundSpouse = false;
                 while(fgets(childLineBuffer, sizeof(childLineBuffer), file))
                 {
+                    // Ignore blank lines
+                    if(strcmp(childLineBuffer, "") == 0) continue;
+
                     char* parent_1 = strtok(childLineBuffer, delimiters);
                     if(parent_1 == NULL) return 0;
 
@@ -83,9 +87,9 @@ int main(int argc, char *argv[])
 
                 // If spouse was found, simply print the child's name
                 if(!foundSpouse)
-                    printf("%s(%i)", childName, pid);
+                    printf("%s(%i)\n", childName, pid);
 
-                // Reset to the second line in the file
+                // Reset the stream indicator
                 fsetpos(file, &currentPosition);
 
                 // Get the next child
