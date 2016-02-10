@@ -63,14 +63,14 @@ int main(int argc, char *argv[])
                     if(parent_2 == NULL) return 0;
 
                     // If the child's name was found in the first or second word
-                    // of any line later in the file
+                    // of any line later in the file, then they have a spouse
                     if( (strcmp(parent_1, childName) == 0) || (strcmp(parent_2, childName) == 0))
                     {
                         foundSpouse = true;
                         PrintTabs(numberOfTabs);
                         printf("%s(%i)-%s\n", parent_1, pid, parent_2);
 
-                        // Fork on each child
+                        // Fork on each child, because they will have children
                         pid = fork();
                         numberOfTabs++;
                         if(pid != 0)
@@ -86,6 +86,7 @@ int main(int argc, char *argv[])
                 }
 
                 // If spouse was found, simply print the child's name
+                PrintTabs(numberOfTabs);
                 if(!foundSpouse)
                     printf("%s(%i)\n", childName, pid);
 
