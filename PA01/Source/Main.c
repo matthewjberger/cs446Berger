@@ -21,7 +21,7 @@ const char *delimiters=" \n\t\r\v\f"; // Delimiters for tokenizing by whitespace
 
 bool BuildTier(FamilyTier *tier, char* line);
 void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, int numberOfTabs);
-int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, bool *hasChildren, char* childName);
+int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, bool *hasSpouse, char* childName);
 
 int main(int argc, char *argv[])
 {
@@ -109,7 +109,7 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
     int count;
     int tierCount;
     char* childName;
-    bool hasChildren;
+    bool hasSpouse;
     pid_t pid;
 
     // Print married name
@@ -125,16 +125,18 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
     // If pid == 0
     if(pid == 0)
     {
+        /*if(tier->numberOfChildren <= 0) exit(0);*/
+
         // Iterate through all children
         for(count = 0; count < tier->numberOfChildren; count++)
         {
             childName = tier->children[count];
-            hasChildren = false;
+            hasSpouse = false;
 
             // Iterate through the rest of the tiers
-            tierCount = FindCorrespondingTier(familyTiers, currentTier, numberOfTiers, &hasChildren, childName);
+            tierCount = FindCorrespondingTier(familyTiers, currentTier, numberOfTiers, &hasSpouse, childName);
 
-            if(hasChildren)
+            if(hasSpouse)
             {
                 // Run the function again with the index of the struct containing child info
                 FindChildren(familyTiers, tierCount, numberOfTiers, numberOfTabs);
@@ -143,9 +145,10 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
             {
                 PrintTabs(numberOfTabs);
                 printf("%s(%i)\n", childName, getpid());
-                exit(0);
             }
         }
+
+       exit(0);
     }
     // else wait
     else if(pid > 0)
@@ -154,7 +157,7 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
     }
 }
 
-int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, bool *hasChildren, char* childName)
+int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, bool *hasSpouse, char* childName)
 {
     int tierCount;
     FamilyTier* tierPtr;
@@ -168,7 +171,7 @@ int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, in
         if((strcmp(childName, tierPtr->parent_1) == 0) ||
                 (strcmp(childName, tierPtr->parent_2) == 0))
         {
-            *hasChildren = true;
+            *hasSpouse = true;
             break;
         }
     }
