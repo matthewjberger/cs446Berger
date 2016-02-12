@@ -14,7 +14,7 @@ typedef struct {
     char *parent_1;
     char *parent_2;
     char *children[MAX_CHILDREN];
-    bool hasSpouse;
+    int numberOfChildren;
 } FamilyTier;
 
 const char *delimiters=" \n\t\r\v\f"; // Delimiters for tokenizing by whitespace
@@ -30,6 +30,7 @@ int main(int argc, char *argv[])
     FILE* file;
     char lineBuffer[MAX_COLUMNS];
     int tierCounter = -1;
+    int numTiers;
 
     // We expect a single argument
     if(!HandleArgs(argc, 1)) return 0;
@@ -60,6 +61,11 @@ int main(int argc, char *argv[])
 
     // Close the file
     fclose(file);
+
+    numTiers = tierCounter;
+    FindChildren(familyTiers, FIRST_TIER, numTiers, FIRST_INDENT);
+
+    return 0;
 }
 
 bool BuildTier(FamilyTier *tier, char* line)
@@ -90,32 +96,73 @@ bool BuildTier(FamilyTier *tier, char* line)
         childCounter++;
     }
 
+    tier->numberOfChildren = childCounter;
+
     return true;
 }
 
 void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, int numberOfTabs)
 {
     // Variables
+    FamilyTier* tier = &familyTiers[currentTier];
+    int count;
+    int tierCount;
+    char* childName;
+    bool hasChildren;
+    pid_t pid;
+    FamilyTier* tierPtr;
 
     // Print married name
+    PrintTabs(numberOfTabs);
+    printf("%s(%i)-%s\n", tier->parent_1, getpid(), tier->parent_2);
 
     // Increment numTabs
+    numberOfTabs++;
 
-    // Iterate through all children
+    // Fork
+    pid = fork();
 
-        // Fork
+    // If pid == 0
+    if(pid == 0)
+    {
+        // Iterate through all children
+        /*for(count = 0; count < tier->numberOfChildren; count++)*/
+        for(count = 0; count < 1; count++)
+        {
+            childName = tier->children[count];
 
-        // If pid == 0
+            hasChildren = false;
 
             // Iterate through the rest of the tiers
+            for(tierCount = currentTier; tierCount < numberOfTiers; tierCount++)
+            {
+                tierPtr = &familyTiers[tierCount];
 
                 // If the parent_1 or parent_2 matches the child's name
+                if((strcmp(childName, tierPtr->parent_1) == 0) ||
+                        (strcmp(childName, tierPtr->parent_2) == 0))
+                {
+                    hasChildren = true;
+                    break;
+                }
+            }
 
-                    // recurse
-
-                // If not
-                    // Print just it's name
-                    // return
-
-        // else wait
+            if(hasChildren)
+            {
+                // Print married name
+                FindChildren(familyTiers, tierCount, numberOfTiers, numberOfTabs);
+            }
+            else
+            {
+                PrintTabs(numberOfTabs);
+                printf("%s(%i)\n", childName, getpid());
+                return;
+            }
+        }
+    }
+    // else wait
+    else if(pid > 0)
+    {
+        waitpid(pid, NULL, 0);
+    }
 }
