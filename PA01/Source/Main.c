@@ -4,8 +4,11 @@
 #define MAX_COLUMNS 255
 #define MAX_CHILDREN 100
 #define MAX_TIERS 100
+#define FIRST_TIER 0
+#define FIRST_INDENT 0
 
 #define PrintTabs(numTabs) for(int count = 0; count < numTabs; count++){ printf("    "); }
+#define STRCPY(dst,src) strcpy(dst=malloc(strlen(src)+1), src) // This will allocate memory before a strcpy
 
 typedef struct {
     char *parent_1;
@@ -17,6 +20,7 @@ typedef struct {
 const char *delimiters=" \n\t\r\v\f"; // Delimiters for tokenizing by whitespace
 
 bool BuildTier(FamilyTier *tier, char* line);
+void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, int numberOfTabs);
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +29,7 @@ int main(int argc, char *argv[])
     char* filename;
     FILE* file;
     char lineBuffer[MAX_COLUMNS];
-    int tierCounter = 0;
+    int tierCounter = -1;
 
     // We expect a single argument
     if(!HandleArgs(argc, 1)) return 0;
@@ -42,6 +46,9 @@ int main(int argc, char *argv[])
     // Get the first line of the file
     while(fgets(lineBuffer, sizeof(lineBuffer), file))
     {
+        // Only increment after successful line read
+        tierCounter++;
+
         // Ignore blank lines in file
         if(strcmp(lineBuffer,"\n") == 0) continue;
 
@@ -49,7 +56,6 @@ int main(int argc, char *argv[])
         if(!BuildTier(&familyTiers[tierCounter], lineBuffer))
             printf("Error reading file!\n");
 
-        tierCounter++;
     }
 
     // Close the file
@@ -67,20 +73,17 @@ bool BuildTier(FamilyTier *tier, char* line)
     // Parents
     parent_1 = strtok(line, delimiters);
     if(parent_1 == NULL) return false;
-    tier->parent_1 = parent_1;
+    STRCPY(tier->parent_1, parent_1);
 
     parent_2 = strtok(NULL, delimiters);
     if(parent_2 == NULL) return false;
-    tier->parent_2 = parent_2;
-
-printf("%s-%s\n", tier->parent_1, tier->parent_2);
+    STRCPY(tier->parent_2, parent_2);
 
     childName = strtok(NULL, delimiters);
     while(childName != NULL)
     {
         // Add the child name to the current family tier
-        tier->children[childCounter] = childName;
-printf("%s\n", tier->children[childCounter]);
+        STRCPY(tier->children[childCounter], childName);
 
         // Get the next child
         childName = strtok(NULL, delimiters);
@@ -88,4 +91,31 @@ printf("%s\n", tier->children[childCounter]);
     }
 
     return true;
+}
+
+void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, int numberOfTabs)
+{
+    // Variables
+
+    // Print married name
+
+    // Increment numTabs
+
+    // Iterate through all children
+
+        // Fork
+
+        // If pid == 0
+
+            // Iterate through the rest of the tiers
+
+                // If the parent_1 or parent_2 matches the child's name
+
+                    // recurse
+
+                // If not
+                    // Print just it's name
+                    // return
+
+        // else wait
 }
