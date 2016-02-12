@@ -7,9 +7,16 @@
 #define FIRST_TIER 0
 #define FIRST_INDENT 0
 
+// This will print the appropriate number of tabs
 #define PrintTabs(numTabs) for(int count = 0; count < numTabs; count++){ printf("    "); }
-#define STRCPY(dst,src) strcpy(dst=malloc(strlen(src)+1), src) // This will allocate memory before a strcpy
 
+// This will allocate memory before a strcpy
+// dst will be a pointer to a string, src is a c-style string to copy
+// malloc() allocates enough memory for each chracter in the src, +1 for the null character
+// then we strcpy like normal
+#define STRCPY(dst,src) strcpy(dst=malloc(strlen(src)+1), src)
+
+// There is one instance of this for every line in the file
 typedef struct {
     char *parent_1;
     char *parent_2;
@@ -17,9 +24,10 @@ typedef struct {
     int numberOfChildren;
 } FamilyTier;
 
-const char *delimiters=" \n\t\r\v\f"; // Delimiters for tokenizing by whitespace
+// Delimiters for tokenizing by whitespace
+const char *delimiters=" \n\t\r\v\f";
 
-bool BuildTier(FamilyTier *tier, char* line);
+bool BuildTier(FamilyTier *tier, char* line); // Fills a FamilyTier struct with information
 void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, int numberOfTabs);
 int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, int numberOfTiers, bool *hasSpouse, char* childName);
 
@@ -63,6 +71,7 @@ int main(int argc, char *argv[])
     // Close the file
     fclose(file);
 
+    // Find the children
     numTiers = tierCounter;
     FindChildren(familyTiers, FIRST_TIER, numTiers, FIRST_INDENT);
 
@@ -77,7 +86,7 @@ bool BuildTier(FamilyTier *tier, char* line)
     int childCounter = 0;
     char* childName;
 
-    // Parents
+    // Read in parent names from the file
     parent_1 = strtok(line, delimiters);
     if(parent_1 == NULL) return false;
     STRCPY(tier->parent_1, parent_1);
@@ -86,6 +95,7 @@ bool BuildTier(FamilyTier *tier, char* line)
     if(parent_2 == NULL) return false;
     STRCPY(tier->parent_2, parent_2);
 
+    // The rest of the words in the line are children
     childName = strtok(NULL, delimiters);
     while(childName != NULL)
     {
@@ -97,6 +107,7 @@ bool BuildTier(FamilyTier *tier, char* line)
         childCounter++;
     }
 
+    // Store the number of children we've counted
     tier->numberOfChildren = childCounter;
 
     return true;
@@ -116,17 +127,12 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
     PrintTabs(numberOfTabs);
     printf("%s(%i)-%s\n", tier->parent_1, getpid(), tier->parent_2);
 
-    // Increment numTabs
     numberOfTabs++;
 
-    // Fork
     pid = fork();
 
-    // If pid == 0
     if(pid == 0)
     {
-        /*if(tier->numberOfChildren <= 0) exit(0);*/
-
         // Iterate through all children
         for(count = 0; count < tier->numberOfChildren; count++)
         {
@@ -148,11 +154,12 @@ void FindChildren(FamilyTier familyTiers[MAX_TIERS], int currentTier, int number
             }
         }
 
+       // Exit the program after iterating through all the children
        exit(0);
     }
-    // else wait
     else if(pid > 0)
     {
+        // Wait for all children to die
         waitpid(pid, NULL, 0);
     }
 }
@@ -162,19 +169,23 @@ int FindCorrespondingTier(FamilyTier familyTiers[MAX_TIERS], int currentTier, in
     int tierCount;
     FamilyTier* tierPtr;
 
-    // Iterate through the rest of the tiers
+    // Iterate through the rest of the lines in the file
+    // They have been stored as structs by this point, one struct per line
     for(tierCount = currentTier; tierCount < numberOfTiers; tierCount++)
     {
+        // Create a pointer for convenience and readability
         tierPtr = &familyTiers[tierCount];
 
         // If the parent_1 or parent_2 matches the child's name
         if((strcmp(childName, tierPtr->parent_1) == 0) ||
                 (strcmp(childName, tierPtr->parent_2) == 0))
         {
+            // Then he/she is married
             *hasSpouse = true;
             break;
         }
     }
 
+    // Return the index of the line we found the child in
     return tierCount;
 }
