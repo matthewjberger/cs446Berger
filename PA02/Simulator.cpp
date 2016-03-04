@@ -3,6 +3,7 @@ using namespace std;
 
 Simulator::Simulator(const string configFile)
 {
+    // Load configuration data
     configurationData = new ConfigurationData(configFile);
     if(configurationData == NULL || !configurationData->LoadedSuccessfully())
     {
@@ -10,6 +11,7 @@ Simulator::Simulator(const string configFile)
         exit(0);
     }
 
+    // Load program data
     program = new Program(configurationData->GetFilePath());
     if(program == NULL)
     {
@@ -20,7 +22,8 @@ Simulator::Simulator(const string configFile)
     // Set how precise the times should be when displayed
     cout.precision(6);
 
-    if(configurationData->GetLoggingMode() == LOG_TO_BOTH || configurationData->GetLoggingMode() == LOG_TO_FILE)
+    // Open the log file if necessary
+    if(configurationData->GetLoggingMode() | LOG_TO_BOTH | LOG_TO_FILE)
     {
         logFile.open(configurationData->GetLogFilePath());
     }
@@ -144,10 +147,10 @@ void Simulator::Handle_Operation(const Operation* operation)
         case 'O':
         {
             // Create a new thread for the IO operation
-            thread IO_Thread(
-                    [this, operation]()
+            thread IO_Thread([this, operation]()
                     {
-                    Handle_IO(operation);
+                        // Run this function when the thread executes
+                        Handle_IO(operation);
                     });
 
             // Join it to wait for the thread to complete

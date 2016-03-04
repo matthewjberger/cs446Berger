@@ -1,5 +1,4 @@
 #include "ConfigurationData.h"
-
 using namespace std;
 
 ConfigurationData::ConfigurationData(std::string configFile)

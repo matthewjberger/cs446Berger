@@ -11,6 +11,7 @@ struct Operation
     int cycleTime;           // Number of cycles the operation takes
 };
 
+
 class Program
 {
     public:
@@ -20,9 +21,9 @@ class Program
         std::queue<Operation> operations;
 
     private:
-
         void CreateOperationFromMetaData(Operation &operation, std::string MetaData);
         void ParseMetaData(const std::string filePath);
+
 };
 
 #endif

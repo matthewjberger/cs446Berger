@@ -37,7 +37,6 @@ class ConfigurationData
         void ParseConfigFile(std::string configFile);
 
         /* All timings are in msec */
-
         std::string version;
         std::string filePath;
         int processorCycleTime;
