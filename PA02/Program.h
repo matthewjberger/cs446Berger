@@ -12,7 +12,6 @@ struct Operation
     // I - 'I'nput,
     // or O - 'O'utput
     char componentLetter;
-
     std::string description; // end, hard drive, keyboard, printer, monitor, run, start
     int cycleTime; // Number of cycles the operation takes
 };
@@ -23,12 +22,11 @@ class Program
         Program(const std::string metaDataFile);
         ~Program();
 
-        std::vector<Operation> operations;
+        std::queue<Operation> operations;
 
     private:
 
-        void ParseMetaData(const std::string file_path)
-
+        void ParseMetaData(const std::string filePath);
 };
 
 #endif

@@ -28,7 +28,7 @@ class ConfigurationData
         LoggingMode GetLoggingMode();
         std::string GetLogFilePath();
 
-        bool LoadSuccessfully();
+        bool LoadedSuccessfully();
 
         void PrintData();
 

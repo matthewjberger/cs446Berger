@@ -8,7 +8,9 @@ ConfigurationData::ConfigurationData(std::string configFile)
     ParseConfigFile(configFile);
 }
 
-ConfigurationData::~ConfigurationData(){}
+ConfigurationData::~ConfigurationData()
+{
+}
 
 int ConfigurationData::GetHardDriveCycleTime()
 {
@@ -62,14 +64,24 @@ void ConfigurationData::ParseConfigFile(std::string configFile)
     ifstream inFile(configFile.c_str());
     if(inFile.fail())
     {
-        throw std::runtime_error("Error! Failed to open configuration file.");
+        cerr << "Error! Failed to open configuration file." << endl;
+        loadedSuccessfully = false;
+        return;
+    }
+
+    // Check first line
+    getline(inFile, lineBuffer);
+    if(lineBuffer != "Start Simulator Configuration File")
+    {
+        cerr << "Error! Invalid configuration file." << endl;
+        return;
     }
 
     while(std::getline(inFile, lineBuffer))
     {
-        if(ContainsString(lineBuffer, "Start Simulator") || ContainsString(lineBuffer, "End Simulator"))
+        if(ContainsString(lineBuffer, "End Simulator"))
         {
-            // Skip the first and last line
+            // Skip the last line
         }
         else if(ContainsString(lineBuffer, "Version"))
         {
@@ -77,23 +89,23 @@ void ConfigurationData::ParseConfigFile(std::string configFile)
         }
         else if(ContainsString(lineBuffer, "Processor"))
         {
-            processorCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
+            processorCycleTime = stoi(GetDataFromLine(lineBuffer));
         }
         else if(ContainsString(lineBuffer, "Monitor"))
         {
-            monitorDisplayTime = atoi(GetDataFromLine(lineBuffer).c_str());
+            monitorDisplayTime = stoi(GetDataFromLine(lineBuffer));
         }
         else if(ContainsString(lineBuffer, "Hard drive"))
         {
-            hardDriveCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
+            hardDriveCycleTime = stoi(GetDataFromLine(lineBuffer));
         }
         else if(ContainsString(lineBuffer, "Printer"))
         {
-            printerCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
+            printerCycleTime = stoi(GetDataFromLine(lineBuffer));
         }
         else if(ContainsString(lineBuffer, "Keyboard"))
         {
-            keyboardCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
+            keyboardCycleTime = stoi(GetDataFromLine(lineBuffer));
         }
         else if(ContainsString(lineBuffer, "Log:"))
         {
@@ -129,7 +141,7 @@ void ConfigurationData::ParseConfigFile(std::string configFile)
     loadedSuccessfully = true;
 }
 
-bool ConfigurationData::LoadSuccessfully()
+bool ConfigurationData::LoadedSuccessfully()
 {
     return loadedSuccessfully;
 }
