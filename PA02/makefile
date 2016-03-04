@@ -14,19 +14,28 @@ COMPILER_FLAGS = -c -std=c++14 -g -Wall -pthread
 # Compiler being used
 CC = g++
 
-# Files to compile
-OBJECTS = *.cpp
+# Source file directory
+SRC_DIR = .
+
+# Find all source files
+SRC= $(shell find $(SRC_DIR) -name '*.cpp')
+
+# List object files
+OBJECTS = $(SRC:%.cpp=%.o)
 
 ###########################################################
 # Build System                                            #
 ###########################################################
 all: $(EXE_NAME)
 
+# Build executable from object files
 $(EXE_NAME): $(OBJECTS)
 	$(CC) $(OBJECTS) -o $(EXE_NAME)
 
+# Create object files from source files
 %.o: %.cpp
 	$(CC) $(COMPILER_FLAGS) $< -o $@
 
+# Remove all object files
 clean: $(OBJECTS)
 	-rm $(OBJECTS)
