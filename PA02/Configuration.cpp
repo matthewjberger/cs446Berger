@@ -55,13 +55,7 @@ std::string ConfigurationData::GetVersion()
     return version;
 }
 
-// Extract data after ': '
-string GetDataFromLine(string input)
-{
-    return input.substr(input.find(':') + 2);
-}
-
-bool ContainsWord(string source, string searchTerm)
+bool ContainsString(string source, string searchTerm)
 {
     if(source.find(searchTerm) != std::string::npos)
     {
@@ -73,82 +67,66 @@ bool ContainsWord(string source, string searchTerm)
     }
 }
 
+// Get everything in string
+// after first occurence of ': '
+string GetDataFromLine(string input)
+{
+    if(!ContainsString(input, ":"))
+    {
+        return "";
+    }
+
+    return input.substr(input.find(':') + 2);
+}
+
 void ConfigurationData::ParseConfigFile(std::string configFile)
 {
     string lineBuffer;
 
     ifstream inFile(configFile.c_str());
-    if(!inFile.good())
-    {
-        loadedSuccessfully = false;
-        return;
-    }
 
     while(std::getline(inFile, lineBuffer))
     {
-        string token;
-        istringstream line(lineBuffer);
-        line >> token;
-        if(token == "Start" || token == "End")
+        if(ContainsString(lineBuffer, "Start Simulator") || ContainsString(lineBuffer, "End Simulator"))
         {
             // Skip the first and last line
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Version"))
+        else if(ContainsString(lineBuffer, "Version"))
         {
             version = GetDataFromLine(lineBuffer);
-            break;
         }
-
-       if(ContainsWord(lineBuffer, "File Path:"))
-        {
-            filePath = GetDataFromLine(lineBuffer);
-            break;
-        }
-
-        if(ContainsWord(lineBuffer, "Processor"))
+        else if(ContainsString(lineBuffer, "Processor"))
         {
             processorCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Monitor"))
+        else if(ContainsString(lineBuffer, "Monitor"))
         {
             monitorDisplayTime = atoi(GetDataFromLine(lineBuffer).c_str());
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Hard drive"))
+        else if(ContainsString(lineBuffer, "Hard drive"))
         {
             hardDriveCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Printer"))
+        else if(ContainsString(lineBuffer, "Printer"))
         {
             printerCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Keyboard"))
+        else if(ContainsString(lineBuffer, "Keyboard"))
         {
             keyboardCycleTime = atoi(GetDataFromLine(lineBuffer).c_str());
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Log:"))
+        else if(ContainsString(lineBuffer, "Log:"))
         {
             string logType = GetDataFromLine(lineBuffer);
-            if(ContainsWord(logType, "Log to Both"))
+            if(ContainsString(logType, "Log to Both"))
             {
                 loggingMode = LOG_TO_BOTH;
             }
-            else if(ContainsWord(logType, "Log to File"))
+            else if(ContainsString(logType, "Log to File"))
             {
                 loggingMode = LOG_TO_FILE;
             }
-            else if(ContainsWord(logType, "Log to Monitor"))
+            else if(ContainsString(logType, "Log to Monitor"))
             {
                 loggingMode = LOG_TO_MONITOR;
             }
@@ -156,13 +134,14 @@ void ConfigurationData::ParseConfigFile(std::string configFile)
             {
                 loadedSuccessfully = false;
             }
-            break;
         }
-
-        if(ContainsWord(lineBuffer, "Log File Path:"))
+        else if(ContainsString(lineBuffer, "Log File Path:"))
         {
             logFilePath = GetDataFromLine(lineBuffer);
-            break;
+        }
+        else if(ContainsString(lineBuffer, "File Path:"))
+        {
+            filePath = GetDataFromLine(lineBuffer);
         }
     }
 
@@ -209,6 +188,5 @@ void ConfigurationData::PrintData()
     cout << "Keyboard cycle time: " << keyboardCycleTime << endl;
     cout << "Logging mode: " << logMode << endl;
     cout << "Log file path: " << logFilePath << endl;
-    cout << "End Simulation Configuration Data output" << endl;
 }
 

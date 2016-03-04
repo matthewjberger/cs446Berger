@@ -1,6 +1,7 @@
 #include "Configuration.h"
 #include "SimpleTimer.h"
 #include <unistd.h>
+
 using namespace std;
 
 // Utility Functions
@@ -16,8 +17,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    cout << "Creating config" << endl;
-
     // Ensure the file exists
     if(access(configurationFile.c_str(), F_OK) == -1)
     {
@@ -25,7 +24,6 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    cout << "Creating config" << endl;
     ConfigurationData configurationData(configurationFile);
     configurationData.PrintData();
 
