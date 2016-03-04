@@ -62,11 +62,11 @@ void Simulator::Handle_IO(const Operation* operation)
     if(operation->description == "hard drive")
     {
         string type;
-        if(operation->description == "I")
+        if(operation->componentLetter == 'I')
         {
             type = "input";
         }
-        else if(operation->description == "O")
+        else if(operation->componentLetter == 'O')
         {
             type = "output";
         }
@@ -121,7 +121,7 @@ void Simulator::Handle_Operation(const Operation* operation)
             if(operation->description == "start")
             {
                 Display("OS: preparing process 1");
-                Display("OS: preparing process 2");
+                Display("OS: starting process 1");
             }
             else if(operation->description == "end")
             {

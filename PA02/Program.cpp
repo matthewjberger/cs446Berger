@@ -30,29 +30,29 @@ void Program::ParseMetaData(const string filePath)
         return;
     }
 
-    // Ignore whitespace
-    inFile >> std::ws;
-
     Operation operation;
 
     // Get each token delimited by semicolons
-    while(lineBuffer != "A(end)0.")
+    while(lineBuffer != "A(end)0")
     {
         if(lineBuffer.back() == '.')
         {
             lineBuffer.pop_back();
         }
 
+        // Ignore whitespace
+        inFile >> std::ws;
+
         // Token format is S(start)0
         getline(inFile, lineBuffer, ';');
 
         // Get the type
-        operation.componentLetter = lineBuffer[0];
+        operation.componentLetter = lineBuffer.front();
 
         // Get the operation description
         int firstParenLoc = lineBuffer.find('(');
         int secondParenLoc = lineBuffer.find(')');
-        string description = lineBuffer.substr(firstParenLoc, secondParenLoc - firstParenLoc);
+        string description = lineBuffer.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
         operation.description = description;
 
         // Get the duration
@@ -63,16 +63,19 @@ void Program::ParseMetaData(const string filePath)
         operations.push(operation);
     }
 
+    // Ignore whitespace
+    inFile >> std::ws;
+
     // Build the final S(end)0 operation
     getline(inFile, lineBuffer, '.');
 
     // Get the type
-    operation.componentLetter = lineBuffer[0];
+    operation.componentLetter = lineBuffer.front();
 
     // Get the operation description
     int firstParenLoc = lineBuffer.find('(');
     int secondParenLoc = lineBuffer.find(')');
-    string description = lineBuffer.substr(firstParenLoc, secondParenLoc - firstParenLoc);
+    string description = lineBuffer.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
     operation.description = description;
 
     // Get the duration
@@ -81,18 +84,6 @@ void Program::ParseMetaData(const string filePath)
 
     // Load the operation into the queue
     operations.push(operation);
-
-    // Eat the final line
-    getline(inFile,lineBuffer);
-
-    // Check last line
-    getline(inFile, lineBuffer);
-    if(lineBuffer != "End Program Meta-Data Code.")
-    {
-        cerr << "Error! Invalid Meta-Data file." << endl;
-        inFile.close();
-        return;
-    }
 
     inFile.close();
 }

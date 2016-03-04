@@ -1,7 +1,4 @@
 #include "Simulator.h"
-#include "SimpleTimer.h"
-#include <unistd.h>
-
 using namespace std;
 
 // Utility Functions
