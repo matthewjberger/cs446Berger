@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include <vector>
 
 // Check if one string contains another string
 bool ContainsString(std::string source, std::string searchTerm);

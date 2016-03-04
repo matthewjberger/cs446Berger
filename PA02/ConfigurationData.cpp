@@ -1,4 +1,4 @@
-#include "Configuration.h"
+#include "ConfigurationData.h"
 
 using namespace std;
 
@@ -60,6 +60,10 @@ void ConfigurationData::ParseConfigFile(std::string configFile)
     string lineBuffer;
 
     ifstream inFile(configFile.c_str());
+    if(inFile.fail())
+    {
+        throw std::runtime_error("Error! Failed to open configuration file.");
+    }
 
     while(std::getline(inFile, lineBuffer))
     {
