@@ -9,7 +9,7 @@
 EXE_NAME = sim01
 
 # Compiler flags
-COMPILER_FLAGS = -c -std=c++14 -g -Wall
+COMPILER_FLAGS = -c -std=c++11 -g -Wall
 
 # Linker flags
 LINKER_FLAGS = -pthread
