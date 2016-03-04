@@ -85,7 +85,7 @@ void Simulator::Handle_IO(const Operation* operation)
     else if(operation->description == "printer")
     {
         Display("Process 1: start printer output");
-        Wait(operation->cycleTime * configurationData->GetKeyboardCycleTime());
+        Wait(operation->cycleTime * configurationData->GetPrinterCycleTime());
         Display("Process 1: end printer output");
     }
     else if(operation->description == "monitor")
