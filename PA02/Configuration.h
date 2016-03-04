@@ -1,11 +1,7 @@
 #ifndef __CONFIGURATION_H
 #define __CONFIGURATION_H
 
-#include <iostream>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <cstdlib>
+#include "Utilities.h"
 
 enum LoggingMode
 {
@@ -32,7 +28,6 @@ class ConfigurationData
         LoggingMode GetLoggingMode();
         std::string GetLogFilePath();
 
-
         bool LoadSuccessfully();
 
         void PrintData();
@@ -56,7 +51,6 @@ class ConfigurationData
         std::string logFilePath;
 
         bool loadedSuccessfully;
-
 };
 
 #endif

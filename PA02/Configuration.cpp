@@ -55,30 +55,6 @@ std::string ConfigurationData::GetVersion()
     return version;
 }
 
-bool ContainsString(string source, string searchTerm)
-{
-    if(source.find(searchTerm) != std::string::npos)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-// Get everything in string
-// after first occurence of ': '
-string GetDataFromLine(string input)
-{
-    if(!ContainsString(input, ":"))
-    {
-        return "";
-    }
-
-    return input.substr(input.find(':') + 2);
-}
-
 void ConfigurationData::ParseConfigFile(std::string configFile)
 {
     string lineBuffer;
