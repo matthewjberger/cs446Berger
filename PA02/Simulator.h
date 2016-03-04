@@ -7,7 +7,7 @@
 
 enum IO
 {
-    INPUT = 0,
+    INPUT  = 0,
     OUTPUT = 1,
 };
 
@@ -21,12 +21,6 @@ class Simulator
 
     private:
 
-        // Loads and stores configuration data
-        ConfigurationData *configurationData;
-
-        // The single program for Sim01
-        Program *program;
-
         // Handles an operation
         void Handle_Operation(const Operation* operation);
 
@@ -36,6 +30,15 @@ class Simulator
         // Outputs time and action
         void Display(std::string output);
 
+        // Makes the current thread sleep for an amount of time using chrono
+        void Wait(int milliseconds);
+
+        // Loads and stores configuration data
+        ConfigurationData *configurationData;
+
+        // The single program for Sim01
+        Program *program;
+
         // Returns the amount of time that has passed
         std::chrono::duration<double> secondsPassed();
 
@@ -44,9 +47,6 @@ class Simulator
 
         // Timing
         std::chrono::time_point<std::chrono::high_resolution_clock> initialTime, currentTime;
-
-        // Makes the current thread sleep for an amount of time using chrono
-        void Wait(int milliseconds);
 };
 
 #endif

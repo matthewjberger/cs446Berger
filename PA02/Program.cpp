@@ -10,10 +10,14 @@ Program::~Program()
 {
 }
 
+// This will load the queue up with operations
+// as described by the meta-data file.
 void Program::ParseMetaData(const string filePath)
 {
     string lineBuffer;
+    Operation operation;
 
+    // Open the file for reading
     ifstream inFile(filePath.c_str());
     if(inFile.fail())
     {
@@ -30,61 +34,58 @@ void Program::ParseMetaData(const string filePath)
         return;
     }
 
-    Operation operation;
 
     // Get each token delimited by semicolons
-    while(lineBuffer != "A(end)0")
+    while(lineBuffer != "S(end)0")
     {
-        if(lineBuffer.back() == '.')
-        {
-            lineBuffer.pop_back();
-        }
-
         // Ignore whitespace
         inFile >> std::ws;
 
         // Token format is S(start)0
         getline(inFile, lineBuffer, ';');
 
-        // Get the type
-        operation.componentLetter = lineBuffer.front();
-
-        // Get the operation description
-        int firstParenLoc = lineBuffer.find('(');
-        int secondParenLoc = lineBuffer.find(')');
-        string description = lineBuffer.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
-        operation.description = description;
-
-        // Get the duration
-        string cycleTime = lineBuffer.substr(secondParenLoc + 1);
-        operation.cycleTime = stoi(cycleTime);
+        // Create the operation
+        CreateOperationFromMetaData(operation, lineBuffer);
 
         // Load the operation into the queue
         operations.push(operation);
+
+        // At the end of the first program
+        if(lineBuffer == "A(end)0")
+        {
+            // Ignore whitespace
+            inFile >> std::ws;
+
+            // Get the final operation S(end)0
+            getline(inFile, lineBuffer, '.');
+
+            // Create the operation
+            CreateOperationFromMetaData(operation, lineBuffer);
+
+            // Load the operation into the queue
+            operations.push(operation);
+        }
     }
 
-    // Ignore whitespace
-    inFile >> std::ws;
+    // Close the file
+    inFile.close();
+}
 
-    // Build the final S(end)0 operation
-    getline(inFile, lineBuffer, '.');
+void Program::CreateOperationFromMetaData(Operation &operation, string metaData)
+{
+    // Operation format is "S(start)0"
 
     // Get the type
-    operation.componentLetter = lineBuffer.front();
+    operation.componentLetter = metaData.front();
 
-    // Get the operation description
-    int firstParenLoc = lineBuffer.find('(');
-    int secondParenLoc = lineBuffer.find(')');
-    string description = lineBuffer.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
+    // Get the operation description from inside the parentheses
+    int firstParenLoc = metaData.find('(');
+    int secondParenLoc = metaData.find(')');
+    string description = metaData.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
     operation.description = description;
 
     // Get the duration
-    string cycleTime = lineBuffer.substr(secondParenLoc + 1);
+    string cycleTime = metaData.substr(secondParenLoc + 1);
     operation.cycleTime = stoi(cycleTime);
-
-    // Load the operation into the queue
-    operations.push(operation);
-
-    inFile.close();
 }
 

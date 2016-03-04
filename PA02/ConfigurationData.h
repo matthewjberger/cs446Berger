@@ -5,9 +5,9 @@
 
 enum LoggingMode
 {
-    LOG_TO_MONITOR = 0,
-    LOG_TO_FILE    = 1,
-    LOG_TO_BOTH    = 2
+    LOG_TO_MONITOR = 0x01,
+    LOG_TO_FILE    = 0x02,
+    LOG_TO_BOTH    = 0x04
 };
 
 class ConfigurationData

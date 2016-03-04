@@ -42,16 +42,16 @@ Simulator::~Simulator()
 
 void Simulator::Display(string output)
 {
-    chrono::duration<double> timePassed = secondsPassed();
+    auto timePassed = secondsPassed().count();
 
-    if(configurationData->GetLoggingMode() == LOG_TO_BOTH || configurationData->GetLoggingMode() == LOG_TO_MONITOR)
+    if(configurationData->GetLoggingMode() |  LOG_TO_BOTH | LOG_TO_MONITOR)
     {
-        cout << fixed << timePassed.count() << " - " << output << endl;
+        cout << fixed << timePassed << " - " << output << endl;
     }
 
-    if(configurationData->GetLoggingMode() == LOG_TO_BOTH || configurationData->GetLoggingMode() == LOG_TO_FILE)
+    if(configurationData->GetLoggingMode() | LOG_TO_BOTH | LOG_TO_FILE)
     {
-        logFile << fixed << timePassed.count() << " - " << output << endl;
+        logFile << fixed << timePassed << " - " << output << endl;
     }
 
 }
