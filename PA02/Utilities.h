@@ -10,6 +10,7 @@
 #include <chrono>
 #include <thread>
 #include <ctime>
+#include <pthread.h>
 
 // Check if one string contains another string
 bool ContainsString(std::string source, std::string searchTerm);

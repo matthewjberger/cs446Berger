@@ -9,7 +9,10 @@
 EXE_NAME = sim01
 
 # Compiler flags
-COMPILER_FLAGS = -c -std=c++14 -g -Wall -pthread
+COMPILER_FLAGS = -c -std=c++14 -g -Wall
+
+# Linker flags
+LINKER_FLAGS = -pthread
 
 # Compiler being used
 CC = g++
@@ -30,7 +33,7 @@ all: $(EXE_NAME)
 
 # Build executable from object files
 $(EXE_NAME): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(EXE_NAME)
+	$(CC) $(OBJECTS) $(LINKER_FLAGS) -o $(EXE_NAME)
 
 # Create object files from source files
 %.o: %.cpp
