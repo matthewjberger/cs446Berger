@@ -56,7 +56,6 @@ void Simulator::Display(string output)
     {
         logFile << fixed << timePassed << " - " << output << endl;
     }
-
 }
 
 void Simulator::Handle_IO(const Operation* operation)
@@ -158,6 +157,7 @@ void Simulator::Handle_Operation(const Operation* operation)
             {
                 IO_Thread.join();
             }
+            break;
         }
     }
 }
@@ -168,12 +168,15 @@ void Simulator::Run()
     while(!program->operations.empty())
     {
         Handle_Operation(&program->operations.front());
+
+        // Remove the operations after they are handled
         program->operations.pop();
     }
 }
 
 chrono::duration<double> Simulator::secondsPassed()
 {
+    // Get the time in seconds passed since the simulator was started
     currentTime = chrono::high_resolution_clock::now();
     return (currentTime - initialTime);
 }
