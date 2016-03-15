@@ -96,61 +96,61 @@ void Simulator::Handle_Operation(const Operation* operation)
     {
         // Simulator
         case 'S':
-        {
-            if(operation->description == "start")
             {
-                initialTime = chrono::high_resolution_clock::now();
-                Display("Simulator program starting");
+                if(operation->description == "start")
+                {
+                    initialTime = chrono::high_resolution_clock::now();
+                    Display("Simulator program starting");
+                }
+                else if(operation->description == "end")
+                {
+                    Display("Simulator program ending");
+                }
+                break;
             }
-            else if(operation->description == "end")
-            {
-                Display("Simulator program ending");
-            }
-            break;
-        }
 
-        // Application
+            // Application
         case 'A':
-        {
-            if(operation->description == "start")
             {
-                Display("OS: preparing process 1");
-                Display("OS: starting process 1");
+                if(operation->description == "start")
+                {
+                    Display("OS: preparing process 1");
+                    Display("OS: starting process 1");
+                }
+                else if(operation->description == "end")
+                {
+                    Display("OS: removing process 1");
+                }
+                break;
             }
-            else if(operation->description == "end")
-            {
-                Display("OS: removing process 1");
-            }
-            break;
-        }
 
-        // Processing
+            // Processing
         case 'P':
-        {
-            Display("Process 1: start processing action");
-            Wait(operation->cycleTime * configurationData.processorCycleTime);
-            Display("Process 1: start processing action");
-            break;
-        }
+            {
+                Display("Process 1: start processing action");
+                Wait(operation->cycleTime * configurationData.processorCycleTime);
+                Display("Process 1: start processing action");
+                break;
+            }
 
-        // I/O
+            // I/O
         case 'I':
         case 'O':
-        {
-            // Create a new thread for the IO operation
-            thread IO_Thread([this, operation]()
-                    {
+            {
+                // Create a new thread for the IO operation
+                thread IO_Thread([this, operation]()
+                        {
                         // Run this function when the thread executes
                         Handle_IO(operation);
-                    });
+                        });
 
-            // Join it to wait for the thread to complete
-            if(IO_Thread.joinable())
-            {
-                IO_Thread.join();
+                // Join it to wait for the thread to complete
+                if(IO_Thread.joinable())
+                {
+                    IO_Thread.join();
+                }
+                break;
             }
-            break;
-        }
     }
 }
 
@@ -184,6 +184,8 @@ void Simulator::ParseConfigurationFile(std::string configFile)
     string lineBuffer;
     string loggingMode;
     string invalid_file_message   = "Invalid configuration file specified.";
+    long int limit = numeric_limits<streamsize>::max();
+    const bool DONT_IGNORE = false;
 
     // Open the file for reading
     ifstream inFile(configFile.c_str());
@@ -204,12 +206,15 @@ void Simulator::ParseConfigurationFile(std::string configFile)
         }
 
         // Declare a lambda to handle repeatedly getting input
-        auto GetNextToken = [&inFile, invalid_file_message]()
+        auto GetNextToken = [&inFile, invalid_file_message, limit](bool ignoreActive = true)
         {
-            long int limit = numeric_limits<streamsize>::max();
             string nextToken;
 
-            inFile.ignore(limit, ':');
+            if(ignoreActive)
+            {
+                inFile.ignore(limit, ':');
+            }
+
             inFile >> nextToken;
 
             return nextToken;
@@ -226,21 +231,20 @@ void Simulator::ParseConfigurationFile(std::string configFile)
         configurationData.printerCycleTime   = stoi(GetNextToken());
         configurationData.keyboardCycleTime  = stoi(GetNextToken());
 
-        // Retrieve everything after the ':' for the log mode line
-        getline(inFile, lineBuffer);
-        //loggingMode = lineBuffer.substr(lineBuffer.find(':' + 2));
+        // Get logging mode
+        GetNextToken(); // 'Log'
+        GetNextToken(DONT_IGNORE); // 'to'
+        loggingMode = GetNextToken(DONT_IGNORE); // 'Both/File/Monitor'
 
-        cout << lineBuffer << endl;
-
-        if(loggingMode == "Log to Both")
+        if(loggingMode == "Both")
         {
             configurationData.loggingMode = LOG_TO_BOTH;
         }
-        else if(loggingMode == "Log to File")
+        else if(loggingMode == "File")
         {
             configurationData.loggingMode = LOG_TO_FILE;
         }
-        else if(loggingMode == "Log to Monitor")
+        else if(loggingMode == "Monitor")
         {
             configurationData.loggingMode = LOG_TO_MONITOR;
         }
