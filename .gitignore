@@ -36,3 +36,12 @@
 # Output directories
 Bin/
 Bin/*
+
+# Output
+family
+sim01
+sim02
+sim03
+
+# Log files
+*.lgf

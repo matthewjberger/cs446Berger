@@ -140,8 +140,8 @@ void Simulator::Handle_Operation(const Operation* operation)
                 // Create a new thread for the IO operation
                 thread IO_Thread([this, operation]()
                         {
-                        // Run this function when the thread executes
-                        Handle_IO(operation);
+                            // Run this function when the thread executes
+                            Handle_IO(operation);
                         });
 
                 // Join it to wait for the thread to complete
@@ -149,6 +149,7 @@ void Simulator::Handle_Operation(const Operation* operation)
                 {
                     IO_Thread.join();
                 }
+
                 break;
             }
     }
@@ -186,12 +187,13 @@ void Simulator::ParseConfigurationFile(std::string configFile)
     string invalid_file_message   = "Invalid configuration file specified.";
     long int limit = numeric_limits<streamsize>::max();
     const bool DONT_IGNORE = false;
-
-    // Open the file for reading
-    ifstream inFile(configFile.c_str());
+    ifstream inFile;
 
     try
     {
+        // Open the file for reading
+        inFile.open(configFile.c_str());
+
         // If file failed to open
         if(inFile.fail())
         {
@@ -263,7 +265,7 @@ void Simulator::ParseConfigurationFile(std::string configFile)
 
     catch( ... )
     {
-        cerr << "Error while reading file: " << invalid_file_message << endl;
+        cerr << "Error while reading configuration file: " << invalid_file_message << endl;
 
         if(inFile.is_open())
         {

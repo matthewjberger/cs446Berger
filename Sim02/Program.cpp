@@ -15,60 +15,80 @@ Program::~Program()
 void Program::ParseMetaData(const string filePath)
 {
     string lineBuffer;
+    string invalid_file_message   = "Invalid Meta-Data file specified.";
     Operation operation;
+    ifstream inFile;
 
-    // Open the file for reading
-    ifstream inFile(filePath.c_str());
-    if(inFile.fail())
+    try
     {
-        cerr << "Error! Failed to open Meta-Data file." << endl;
-        return;
-    }
+        // Open the file for reading
+        inFile.open(filePath.c_str());
 
-    // Check first line
-    getline(inFile, lineBuffer);
-    if(lineBuffer != "Start Program Meta-Data Code:")
-    {
-        cerr << "Error! Invalid Meta-Data file." << endl;
-        inFile.close();
-        return;
-    }
+        // If the file failed to open
+        if(inFile.fail())
+        {
+            throw new exception;
+        }
 
+        // Check first line
+        getline(inFile, lineBuffer);
+        if(lineBuffer != "Start Program Meta-Data Code:")
+        {
+            throw new exception;
+        }
 
-    // Get each token delimited by semicolons
-    while(lineBuffer != "S(end)0")
-    {
-        // Ignore whitespace
-        inFile >> std::ws;
-
-        // Token format is S(start)0
-        getline(inFile, lineBuffer, ';');
-
-        // Create the operation
-        CreateOperationFromMetaData(operation, lineBuffer);
-
-        // Load the operation into the queue
-        operations.push(operation);
-
-        // At the end of the first program
-        if(lineBuffer == "A(end)0")
+        // Get each token delimited by semicolons
+        while(lineBuffer != "S(end)0")
         {
             // Ignore whitespace
             inFile >> std::ws;
 
-            // Get the final operation S(end)0
-            getline(inFile, lineBuffer, '.');
+            // Token format is S(start)0
+            getline(inFile, lineBuffer, ';');
 
             // Create the operation
             CreateOperationFromMetaData(operation, lineBuffer);
 
             // Load the operation into the queue
             operations.push(operation);
+
+            // At the end of the first program
+            if(lineBuffer == "A(end)0")
+            {
+                // Ignore whitespace
+                inFile >> std::ws;
+
+                // Get the final operation S(end)0
+                getline(inFile, lineBuffer, '.');
+
+                // Create the operation
+                CreateOperationFromMetaData(operation, lineBuffer);
+
+                // Load the operation into the queue
+                operations.push(operation);
+            }
+
+            if(inFile.eof())
+            {
+                throw new exception;
+            }
         }
+
+        // Close the file
+        inFile.close();
     }
 
-    // Close the file
-    inFile.close();
+    catch( ... )
+    {
+        cerr << "Error while reading Meta-Data file: " << invalid_file_message << endl;
+
+        if(inFile.is_open())
+        {
+            inFile.close();
+        }
+
+        throw;
+    }
 }
 
 void Program::CreateOperationFromMetaData(Operation &operation, string metaData)
