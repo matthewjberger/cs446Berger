@@ -8,10 +8,10 @@ Simulator::Simulator(const string configFile)
 
     // Load program data
     program = new Program(configurationData.filePath);
-    if(program == NULL)
+    if(program == nullptr)
     {
         cerr << "Failed to load the program for the simulator!" << endl;
-        exit(0);
+        throw new exception;
     }
 
     // Set how precise the times should be when displayed
@@ -32,7 +32,7 @@ Simulator::~Simulator()
     }
 
     delete program;
-    program = NULL;
+    program = nullptr;
 }
 
 void Simulator::Display(string output)
