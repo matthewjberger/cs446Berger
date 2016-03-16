@@ -1,33 +1,53 @@
-#ifndef __PROGRAM_H
-#define __PROGRAM_H
+#ifndef _PROGRAM_H
+#define _PROGRAM_H
 
-#include <iostream>
-#include <string>
 #include <queue>
-#include <fstream>
+#include <string>
 
-// Meta-Data operations
-struct Operation
+enum States
 {
-    char componentLetter;    // S, A, P, I, O
-    std::string description; // start, end, run, hard drive, keyboard, printer, monitor
-    int cycleTime;           // Number of cycles the operation takes
+    NEW       = 0,
+    READY     = 1,
+    WAITING   = 2,
+    RUNNING   = 3,
+    SUSPENDED = 4
 };
 
+struct Operation
+{
+    // S, A, P, I, O
+    char id;
+
+    // start, end, run, hard drive, keyboard, printer, monitor
+    std::string description;
+
+    // Number of cycles the operation takes
+    int cycleTime;
+};
 
 class Program
 {
     public:
-        Program( const std::string metaDataFile );
+
+        Program();
         ~Program();
 
-
-        void AddOperationFromMetaData( std::string MetaData );
-        std::queue<Operation> operations;
+        void UpdateTotalTime(int time);
+        void addOperation(const std::string &operationString);
+        int GetPID();
 
     private:
-        void ParseMetaData( const std::string filePath );
 
+        std::queue<Operation> operations;
+
+        struct
+        {
+            int state;
+            int pid;
+            int totalTime; // Sum of time taken by operations
+        } processControlBlock;
 };
 
 #endif
+
+

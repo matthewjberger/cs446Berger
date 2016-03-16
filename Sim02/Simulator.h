@@ -17,92 +17,78 @@
 
 #include "Program.h"
 
-enum LoggingMode
-{
-    LOG_TO_MONITOR = 0x01,
-    LOG_TO_FILE    = 0x02,
-    LOG_TO_BOTH    = 0x04
-};
-
-enum SchedulingCode
-{
-    FIFO   = 0,
-    SJF    = 1,
-    SRTF_N = 2
-};
+#define VERSION "2.0"
 
 class Simulator
 {
     public:
-        Simulator(const std::string configFile);
+
+        Simulator(const std::string &configFile);
         ~Simulator();
 
-        void Run();
+        void run();
 
     private:
 
-        // Configuration Data
-        struct ConfigurationData
+       enum LoggingMode
         {
-            // File information
+            LOG_TO_MONITOR = 0x01,
+            LOG_TO_FILE    = 0x02,
+            LOG_TO_BOTH    = 0x04
+        };
+
+        enum SchedulingCode
+        {
+            FIFO   = 0,
+            SJF    = 1,
+            SRTF_N = 2
+        };
+
+        struct
+        {
             std::string version;
             std::string filePath;
 
-            // Cycle times
             int processorCycleTime;
             int monitorDisplayTime;
             int hardDriveCycleTime;
             int printerCycleTime;
             int keyboardCycleTime;
 
-            // Logging
             LoggingMode loggingMode;
             std::string logFilePath;
 
-            // Scheduling Code
             SchedulingCode schedulingCode;
-        };
+        } configurationData;
 
-        ConfigurationData configurationData;
+        std::queue<Program> programs;
 
-        // Program Actions
-        struct Operation
-        {
-            char componentLetter;    // S, A, P, I, O
-            std::string description; // start, end, run, hard drive, keyboard, printer, monitor
-            int cycleTime;           // Number of cycles the operation takes
-        };
+        std::ofstream logFile;
 
-        // Programs
-        struct Program
-        {
-            int pid;
-            std::queue<Operation> operations;
-        };
+        std::chrono::time_point<std::chrono::high_resolution_clock>
+            initialTime, currentTime;
 
-        // Handles an operation
-        void Handle_Operation( const Operation* operation );
+        // Handles Program operations
+        void handleOperation( const Operation* operation );
 
         // Handles IO with a unique thread
-        void Handle_IO( const Operation* operation );
+        void handleIO( const Operation* operation );
 
-        // Outputs time and action
-        void Display( std::string output );
+        // Outputs to monitor, log, or both depending on current loggingMode
+        void display( const std::string &output );
 
         // Makes the current thread sleep for an amount of time using chrono
-        void Wait( int milliseconds );
+        void wait( int milliseconds );
 
         // Returns the amount of time that has passed
         std::chrono::duration<double> secondsPassed();
 
-        // Log file handle
-        std::ofstream logFile;
-
-        // Timing
-        std::chrono::time_point<std::chrono::high_resolution_clock> initialTime, currentTime;
-
-        // Fills out the configuration data struct
-        void ParseConfigurationFile( std::string configFile );
+        void parseMetaData();
+        void parseConfigurationFile(const std::string &configFile );
+        void setLoggingMode( const std::string &loggingMode );
+        void setSchedulingCode( const std::string &schedulingCode );
+        void checkVersion();
+        void handleError(const std::string &message);
 
 };
 
