@@ -18,14 +18,15 @@ struct Operation
 class Program
 {
     public:
-        Program(const std::string metaDataFile);
+        Program( const std::string metaDataFile );
         ~Program();
 
+
+        void AddOperationFromMetaData( std::string MetaData );
         std::queue<Operation> operations;
 
     private:
-        void CreateOperationFromMetaData(Operation &operation, std::string MetaData);
-        void ParseMetaData(const std::string filePath);
+        void ParseMetaData( const std::string filePath );
 
 };
 

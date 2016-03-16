@@ -6,13 +6,7 @@ Simulator::Simulator(const string configFile)
     // Load configuration data
     ParseConfigurationFile(configFile);
 
-    // Load program data
-    program = new Program(configurationData.filePath);
-    if(program == nullptr)
-    {
-        cerr << "Failed to load the program for the simulator!" << endl;
-        throw new exception;
-    }
+    // TODO: Load program data
 
     // Set how precise the times should be when displayed
     cout.precision(6);
@@ -30,9 +24,6 @@ Simulator::~Simulator()
     {
         logFile.close();
     }
-
-    delete program;
-    program = nullptr;
 }
 
 void Simulator::Display(string output)
@@ -158,6 +149,7 @@ void Simulator::Handle_Operation(const Operation* operation)
 void Simulator::Run()
 {
     // Execute all operations in the queue
+/*
     while(!program->operations.empty())
     {
         Handle_Operation(&program->operations.front());
@@ -165,6 +157,7 @@ void Simulator::Run()
         // Remove the operations after they are handled
         program->operations.pop();
     }
+*/
 }
 
 chrono::duration<double> Simulator::secondsPassed()
@@ -225,6 +218,9 @@ void Simulator::ParseConfigurationFile(std::string configFile)
         // File Information
         configurationData.version = GetNextToken();
         configurationData.filePath = GetNextToken();
+
+        // Scheduling code
+
 
         // Cycle times
         configurationData.processorCycleTime = stoi(GetNextToken());

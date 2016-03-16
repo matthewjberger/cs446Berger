@@ -91,9 +91,10 @@ void Program::ParseMetaData(const string filePath)
     }
 }
 
-void Program::CreateOperationFromMetaData(Operation &operation, string metaData)
+void Program::AddOperationFromMetaData(string metaData)
 {
     // Operation format is "S(start)0"
+    Operation operation;
 
     // Get the type
     operation.componentLetter = metaData.front();
@@ -107,5 +108,7 @@ void Program::CreateOperationFromMetaData(Operation &operation, string metaData)
     // Get the duration
     string cycleTime = metaData.substr(secondParenLoc + 1);
     operation.cycleTime = stoi(cycleTime);
+
+    operations.add(operation);
 }
 
