@@ -1,8 +1,9 @@
-#ifndef _PROGRAM_H
-#define _PROGRAM_H
+#ifndef PROGRAM_H_
+#define PROGRAM_H_
 
 #include <queue>
 #include <string>
+#include <memory>
 
 enum States
 {
@@ -10,19 +11,30 @@ enum States
     READY     = 1,
     WAITING   = 2,
     RUNNING   = 3,
-    SUSPENDED = 4
+    SUSPENDED = 4,
+    EXIT      = 5
 };
 
-struct Operation
+class Operation
 {
-    // S, A, P, I, O
-    char id;
+    public:
 
-    // start, end, run, hard drive, keyboard, printer, monitor
-    std::string description;
+        Operation( const char id,
+                   const std::string &description,
+                   const int cycleTime );
 
-    // Number of cycles the operation takes
-    int cycleTime;
+        char id() const;
+        std::string description() const;
+        int cycleTime() const;
+
+    private:
+
+        char id_; // S, A, P, I, O
+
+        // start, end, run, hard drive, keyboard, printer, monitor
+        std::string description_;
+
+        int cycleTime_;// Number of cycles the operation takes
 };
 
 class Program
@@ -32,18 +44,18 @@ class Program
         Program();
         ~Program();
 
-        void UpdateTotalTime(int time);
-        void addOperation(const std::string &operationString);
-        int GetPID();
+        void updateTotalTime( int time );
+        void addOperation( const std::string &operationString );
+        int processID();
 
     private:
 
-        std::queue<Operation> operations;
+        std::queue<Operation> operations_;
 
         struct
         {
             int state;
-            int pid;
+            int processID;
             int totalTime; // Sum of time taken by operations
         } processControlBlock;
 };

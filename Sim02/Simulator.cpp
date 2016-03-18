@@ -3,10 +3,19 @@ using namespace std;
 
 Simulator::Simulator(const string &configFile)
 {
-    // Load configuration data
-    parseConfigurationFile(configFile);
+    const string ERROR_MESSAGE = "Could not create the simulator";
 
-    // TODO: Load program data
+    // Load configuration data
+    if(!parseConfigurationFile(configFile))
+    {
+        throw new std::runtime_error(ERROR_MESSAGE);
+    }
+
+    // Load metadata
+    if(!parseMetaData())
+    {
+        throw new std::runtime_error(ERROR_MESSAGE);
+    }
 
     // Set how precise the times should be when displayed
     cout.precision(6);
@@ -14,46 +23,46 @@ Simulator::Simulator(const string &configFile)
     // Open the log file if necessary
     if(configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE)
     {
-        logFile.open(configurationData.logFilePath);
+        logFile_.open(configurationData.logFilePath);
     }
 }
 
 Simulator::~Simulator()
 {
-    if(logFile.is_open())
+    if(logFile_.is_open())
     {
-        logFile.close();
+        logFile_.close();
     }
 }
 
 void Simulator::display(const string &output)
 {
-    auto timePassed = secondsPassed().count();
+    const auto timePassed = secondsPassed().count();
 
-    if(configurationData.loggingMode |  LOG_TO_BOTH | LOG_TO_MONITOR)
+    if( configurationData.loggingMode |  LOG_TO_BOTH | LOG_TO_MONITOR )
     {
         cout << fixed << timePassed << " - " << output << endl;
     }
 
-    if(configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE)
+    if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
     {
-        logFile << fixed << timePassed << " - " << output << endl;
+        logFile_ << fixed << timePassed << " - " << output << endl;
     }
 }
 
 chrono::duration<double> Simulator::secondsPassed()
 {
     // Get the time in seconds passed since the simulator was started
-    currentTime = chrono::high_resolution_clock::now();
-    return (currentTime - initialTime);
+    currentTime_ = chrono::high_resolution_clock::now();
+    return (currentTime_ - initialTime_);
 }
 
-void Simulator::wait(int milliseconds)
+void Simulator::wait(int milliseconds) const
 {
     this_thread::sleep_for(chrono::milliseconds(milliseconds));
 }
 
-void Simulator::parseConfigurationFile(const std::string &configFile)
+bool Simulator::parseConfigurationFile(const std::string &configFile)
 {
     // Variables
     string lineBuffer;
@@ -62,167 +71,184 @@ void Simulator::parseConfigurationFile(const std::string &configFile)
     const bool DONT_IGNORE = false;
     ifstream inFile;
 
-    try
+    // Define an error lambda
+    auto HandleError = [this, INVALID_FILE_MESSAGE, &inFile]()
     {
-        // Open the file for reading
-        inFile.open(configFile.c_str());
+        displayErrorMessage(INVALID_FILE_MESSAGE);
 
-        // If file failed to open
-        if(inFile.fail())
-        {
-            throw new exception;
-        }
-
-        // Check first line
-        getline(inFile, lineBuffer);
-        if(lineBuffer != "Start Simulator Configuration File")
-        {
-            throw new exception;
-        }
-
-        // Declare a lambda to handle repeatedly getting input
-        auto GetNextToken = [&inFile, LIMIT](const bool ignoreActive = true)
-        {
-            string nextToken;
-
-            if(ignoreActive)
-            {
-                inFile.ignore(LIMIT, ':');
-            }
-
-            inFile >> nextToken;
-
-            return nextToken;
-        };
-
-        // File Information
-        configurationData.version = GetNextToken();
-        checkVersion();
-
-        // Metadata path
-        configurationData.filePath = GetNextToken();
-
-        // Scheduling code
-        setSchedulingCode(GetNextToken());
-
-        // Cycle times
-        configurationData.processorCycleTime = stoi(GetNextToken());
-        configurationData.monitorDisplayTime = stoi(GetNextToken());
-        configurationData.hardDriveCycleTime = stoi(GetNextToken());
-        configurationData.printerCycleTime   = stoi(GetNextToken());
-        configurationData.keyboardCycleTime  = stoi(GetNextToken());
-
-        // Get logging mode
-        GetNextToken(); // 'Log'
-        GetNextToken(DONT_IGNORE); // 'to'
-        setLoggingMode(GetNextToken(DONT_IGNORE)); // 'Both/File/Monitor'
-
-        // Log File Path
-        configurationData.logFilePath = GetNextToken();
-
-        if(inFile.is_open())
-        {
-            inFile.close();
-        }
-    }
-
-    catch( ... )
-    {
+        // Make sure the file is closed properly
         if(inFile.is_open())
         {
             inFile.close();
         }
 
-        handleError(INVALID_FILE_MESSAGE);
+        return false;
+    };
+
+    // Open the file for reading
+    inFile.open(configFile.c_str());
+
+    // If file failed to open
+    if(inFile.fail())
+    {
+        return HandleError();
     }
+
+    // Check first line
+    getline(inFile, lineBuffer);
+
+    if(lineBuffer != "Start Simulator Configuration File")
+    {
+        return HandleError();
+    }
+
+    // Declare a lambda to handle repeatedly getting input
+    auto GetNextToken = [&inFile, LIMIT](const bool ignoreActive = true)
+    {
+        string nextToken;
+
+        if(ignoreActive)
+        {
+            inFile.ignore(LIMIT, ':');
+        }
+
+        inFile >> nextToken;
+
+        return nextToken;
+    };
+
+    // File Information
+    configurationData.version = GetNextToken();
+    checkVersion();
+
+    // Metadata path
+    configurationData.filePath = GetNextToken();
+
+    // Scheduling code
+    setSchedulingCode(GetNextToken());
+
+    // Cycle times
+    configurationData.processorCycleTime = stoi(GetNextToken());
+    configurationData.monitorDisplayTime = stoi(GetNextToken());
+    configurationData.hardDriveCycleTime = stoi(GetNextToken());
+    configurationData.printerCycleTime   = stoi(GetNextToken());
+    configurationData.keyboardCycleTime  = stoi(GetNextToken());
+
+    // Get logging mode
+    GetNextToken(); // 'Log'
+    GetNextToken(DONT_IGNORE); // 'to'
+    setLoggingMode(GetNextToken(DONT_IGNORE)); // 'Both/File/Monitor'
+
+    // Log File Path
+    configurationData.logFilePath = GetNextToken();
+
+    if(inFile.is_open())
+    {
+        inFile.close();
+    }
+
+    return true;
 }
 
-void Simulator::parseMetaDa
-
+bool Simulator::parseMetaData()
+{
+    return true;
+}
 
 void Simulator::run()
 {
     // Execute all operations in the queue
-/*
-    while(!program->operations.empty())
+    switch(configurationData.schedulingCode)
     {
-        Handle_Operation(&program->operations.front());
+        case FCFS:
+        {
+            executeFCFS();
+            break;
+        }
 
-        // Remove the operations after they are handled
-        program->operations.pop();
+        case SJF:
+        {
+            executeSJF();
+            break;
+        }
+
+        case SRTF_N:
+        {
+            executeSRTFN();
+            break;
+        }
     }
-*/
 }
 
-void Simulator::handleIO(const Operation* operation)
+void Simulator::handleIO(const Operation& operation)
 {
     string type;
 
     // Handle specific types of IO
-    if(operation->description == "hard drive")
+    if(operation.description() == "hard drive")
     {
-        if(operation->id == 'I')
+        if(operation.id() == 'I')
         {
             type = "input";
         }
-        else if(operation->id == 'O')
+        else if(operation.id() == 'O')
         {
             type = "output";
         }
 
         // display output
         display("Process 1: start hard drive " + type);
-        wait(operation->cycleTime * configurationData.hardDriveCycleTime);
+        wait(operation.cycleTime() * configurationData.hardDriveCycleTime);
         display("Process 1: end hard drive " + type);
     }
-    else if(operation->description == "keyboard")
+    else if(operation.description() == "keyboard")
     {
         display("Process 1: start keyboard input");
-        wait(operation->cycleTime * configurationData.keyboardCycleTime);
+        wait(operation.cycleTime() * configurationData.keyboardCycleTime);
         display("Process 1: end keyboard input");
     }
-    else if(operation->description == "printer")
+    else if(operation.description() == "printer")
     {
         display("Process 1: start printer output");
-        wait(operation->cycleTime * configurationData.printerCycleTime);
+        wait(operation.cycleTime() * configurationData.printerCycleTime);
         display("Process 1: end printer output");
     }
-    else if(operation->description == "monitor")
+    else if(operation.description() == "monitor")
     {
         display("Process 1: start monitor output");
-        wait(operation->cycleTime * configurationData.monitordisplayTime);
+        wait(operation.cycleTime() * configurationData.monitorDisplayTime);
         display("Process 1: end monitor output");
     }
 }
 
-void Simulator::handleOperation(const Operation* operation)
+void Simulator::handleOperation(const Operation& operation)
 {
-    switch(operation->id)
+    switch(operation.id())
     {
         // Simulator
         case 'S':
         {
-             if(operation->description == "start")
-             {
-                 initialTime = chrono::high_resolution_clock::now();
-                 display("Simulator program starting");
-             }
-             else if(operation->description == "end")
-             {
-                 display("Simulator program ending");
-             }
-             break;
+            if(operation.description() == "start")
+            {
+                initialTime_ = chrono::high_resolution_clock::now();
+                display("Simulator program starting");
+            }
+            else if(operation.description() == "end")
+            {
+                display("Simulator program ending");
+            }
+            break;
         }
 
         // Application
         case 'A':
         {
-            if(operation->description == "start")
+            if(operation.description() == "start")
             {
                 display("OS: preparing process 1");
                 display("OS: starting process 1");
             }
-            else if(operation->description == "end")
+            else if(operation.description() == "end")
             {
                 display("OS: removing process 1");
             }
@@ -233,7 +259,7 @@ void Simulator::handleOperation(const Operation* operation)
         case 'P':
         {
             display("Process 1: start processing action");
-            wait(operation->cycleTime * configurationData.processorCycleTime);
+            wait(operation.cycleTime() * configurationData.processorCycleTime);
             display("Process 1: start processing action");
             break;
         }
@@ -246,8 +272,8 @@ void Simulator::handleOperation(const Operation* operation)
             thread IO_Thread(
                     [this, operation]()
                     {
-                        // Run this function when the thread executes
-                        handleIO(operation);
+                    // Run this function when the thread executes
+                    handleIO(operation);
                     });
 
             // Join it to wait for the thread to complete
@@ -261,7 +287,7 @@ void Simulator::handleOperation(const Operation* operation)
     }
 }
 
-void Simulator::setLoggingMode( const string &loggingMode )
+bool Simulator::setLoggingMode( const string &loggingMode )
 {
     string errorMessage =
         "Invalid loggingMode specified. Could not set logging mode.";
@@ -280,18 +306,21 @@ void Simulator::setLoggingMode( const string &loggingMode )
     }
     else
     {
-        handleError(errorMessage);
+        displayErrorMessage(errorMessage);
+        return false;
     }
+
+    return true;
 }
 
-void Simulator::setSchedulingCode(const string &schedulingCode)
+bool Simulator::setSchedulingCode(const string &schedulingCode)
 {
     const string ERROR_MESSAGE =
         "Invalid scheduling code specified. Could not set scheduling code";
 
-    if(schedulingCode == "FIFO")
+    if(schedulingCode == "FCFS")
     {
-        configurationData.schedulingCode = FIFO;
+        configurationData.schedulingCode = FCFS;
     }
     else if(schedulingCode == "SJF")
     {
@@ -303,24 +332,29 @@ void Simulator::setSchedulingCode(const string &schedulingCode)
     }
     else
     {
-        handleError(ERROR_MESSAGE);
+        displayErrorMessage(ERROR_MESSAGE);
+        return false;
     }
+
+    return true;
 }
 
-void Simulator::checkVersion()
+bool Simulator::checkVersion() const
 {
     const string ERROR_MESSAGE =
         "Invalid version specified in configuration file";
 
     if(configurationData.version != VERSION)
     {
-        handleError(ERROR_MESSAGE);
+        displayErrorMessage(ERROR_MESSAGE);
+        return false;
     }
+
+    return true;
 }
 
-void Simulator::handleError(const string &message)
+void Simulator::displayErrorMessage(const string &message) const
 {
     cerr << "Error: " << message << endl;
-    throw new exception;
 }
 

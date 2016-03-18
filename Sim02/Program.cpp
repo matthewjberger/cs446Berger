@@ -1,40 +1,79 @@
 #include "Program.h"
 using namespace std;
 
+/****** Program ******/
 Program::Program()
 {
-    processControlBlock.state = NEW;
-    processControlBlock.pid = 0;
-    processControlBlock.totalTime = 0;
+    processControlBlock.state      = NEW;
+    processControlBlock.processID  = 0;
+    processControlBlock.totalTime  = 0;
 }
 
 Program::~Program()
 {
+    while(!operations_.empty())
+    {
+        operations_.pop();
+    }
 }
 
 void Program::addOperation(const std::string &operationString)
 {
     // Operation format is "S(start)0"
-    Operation operation;
 
     // Get the type
-    operation.id = operationString.front();
+    char id = operationString.front();
 
     // Get the operation description from inside the parentheses
-    int firstParenLoc = operationString.find('(');
-    int secondParenLoc = operationString.find(')');
-    string description = operationString.substr(firstParenLoc + 1, secondParenLoc - firstParenLoc - 1);
-    operation.description = description;
+    int firstParenLoc  = operationString.find( '(' );
+    int secondParenLoc = operationString.find( ')' );
+    int beginning      = firstParenLoc + 1;
+    int end            = secondParenLoc - firstParenLoc - 1;
+    string description = operationString.substr( beginning, end );
 
     // Get the duration
-    string cycleTime = operationString.substr(secondParenLoc + 1);
-    operation.cycleTime = stoi(cycleTime);
+    string cycleTimeString = operationString.substr( secondParenLoc + 1 );
+    int cycleTime          = stoi(cycleTimeString);
 
     // Add the operation
-    operations.push(operation);
+    Operation operation(id, description, cycleTime);
+    operations_.push(operation);
 }
 
-int Program::GetPID()
+int Program::processID()
 {
-    return processControlBlock.pid;
+    return processControlBlock.processID;
 }
+
+void Program::updateTotalTime( int time )
+{
+    processControlBlock.totalTime = time;
+}
+
+/****** Operation ******/
+Operation::Operation( const char id,
+                      const std::string &description,
+                      const int cycleTime )
+{
+    this->id_          = id;
+    this->description_ = description;
+    this->cycleTime_   = cycleTime;
+
+}
+
+char Operation::id() const
+{
+    return id_;
+}
+
+int Operation::cycleTime() const
+{
+    return cycleTime_;
+}
+
+std::string Operation::description() const
+{
+    return description_;
+}
+
+

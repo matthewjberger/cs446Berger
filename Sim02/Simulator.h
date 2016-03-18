@@ -1,5 +1,5 @@
-#ifndef __SIMULATOR_H
-#define __SIMULATOR_H
+#ifndef SIMULATOR_H_
+#define SIMULATOR_H_
 
 #include <iostream>
 #include <string>
@@ -39,7 +39,7 @@ class Simulator
 
         enum SchedulingCode
         {
-            FIFO   = 0,
+            FCFS   = 0,
             SJF    = 1,
             SRTF_N = 2
         };
@@ -61,35 +61,42 @@ class Simulator
             SchedulingCode schedulingCode;
         } configurationData;
 
-        std::queue<Program> programs;
-
-        std::ofstream logFile;
-
-        std::chrono::time_point<std::chrono::high_resolution_clock>
-            initialTime, currentTime;
+        /***** Member Functions *****/
 
         // Handles Program operations
-        void handleOperation( const Operation* operation );
+        void handleOperation( const Operation& operation );
 
         // Handles IO with a unique thread
-        void handleIO( const Operation* operation );
+        void handleIO(const Operation& operation );
 
         // Outputs to monitor, log, or both depending on current loggingMode
         void display( const std::string &output );
 
         // Makes the current thread sleep for an amount of time using chrono
-        void wait( int milliseconds );
+        void wait( int milliseconds ) const;
 
         // Returns the amount of time that has passed
         std::chrono::duration<double> secondsPassed();
 
-        void parseMetaData();
-        void parseConfigurationFile(const std::string &configFile );
-        void setLoggingMode( const std::string &loggingMode );
-        void setSchedulingCode( const std::string &schedulingCode );
-        void checkVersion();
-        void handleError(const std::string &message);
+        // Scheduling Handlers
+        void executeFCFS();
+        void executeSJF();
+        void executeSRTFN();
 
+        bool parseMetaData();
+        bool parseConfigurationFile(const std::string &configFile );
+        bool setLoggingMode( const std::string &loggingMode );
+        bool setSchedulingCode( const std::string &schedulingCode );
+        bool checkVersion() const;
+        void displayErrorMessage(const std::string &message) const;
+
+        /***** Member Variables *****/
+        std::queue<Program> programs_;
+
+        std::ofstream logFile_;
+
+        std::chrono::time_point<std::chrono::high_resolution_clock>
+            initialTime_, currentTime_;
 };
 
 #endif
