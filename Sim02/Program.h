@@ -4,6 +4,7 @@
 #include <queue>
 #include <string>
 #include <memory>
+#include <list>
 
 enum States
 {
@@ -44,13 +45,17 @@ class Program
         Program();
         ~Program();
 
+        void run();
+        void exit();
         void updateTotalTime( int time );
         void addOperation( const std::string &operationString );
+        void clearOperations();
         int processID();
+        std::list<Operation> operations();
 
     private:
 
-        std::queue<Operation> operations_;
+        std::list<Operation> operations_;
 
         struct
         {

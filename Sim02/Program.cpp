@@ -11,10 +11,7 @@ Program::Program()
 
 Program::~Program()
 {
-    while(!operations_.empty())
-    {
-        operations_.pop();
-    }
+    clearOperations();
 }
 
 void Program::addOperation(const std::string &operationString)
@@ -37,7 +34,7 @@ void Program::addOperation(const std::string &operationString)
 
     // Add the operation
     Operation operation(id, description, cycleTime);
-    operations_.push(operation);
+    operations_.push_back(operation);
 }
 
 int Program::processID()
@@ -48,6 +45,29 @@ int Program::processID()
 void Program::updateTotalTime( int time )
 {
     processControlBlock.totalTime = time;
+}
+
+void Program::clearOperations()
+{
+    if(!operations_.empty())
+    {
+        operations_.clear();
+    }
+}
+
+std::list<Operation> Program::operations()
+{
+    return operations_;
+}
+
+void Program::run()
+{
+    processControlBlock.state = RUNNING;
+}
+
+void Program::exit()
+{
+    processControlBlock.state = EXIT;
 }
 
 /****** Operation ******/

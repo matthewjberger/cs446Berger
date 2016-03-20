@@ -14,10 +14,13 @@
 #include <unistd.h>
 #include <limits>
 #include <stdexcept>
+#include <iomanip>
 
 #include "Program.h"
 
 #define VERSION "2.0"
+#define TRAILING_PRECISION 6
+#define LEADING_PRECISION (3 + TRAILING_PRECISION + 1) // +1 for the decimal
 
 class Simulator
 {
@@ -89,6 +92,8 @@ class Simulator
         bool setSchedulingCode( const std::string &schedulingCode );
         bool checkVersion() const;
         void displayErrorMessage(const std::string &message) const;
+        void displayRemoveProcessText();
+        void displayLoadProcessText();
 
         /***** Member Variables *****/
         std::queue<Program> programs_;
@@ -97,6 +102,9 @@ class Simulator
 
         std::chrono::time_point<std::chrono::high_resolution_clock>
             initialTime_, currentTime_;
+
+        int processCount_;
+        std::string processText;
 };
 
 #endif

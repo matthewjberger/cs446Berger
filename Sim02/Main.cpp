@@ -28,9 +28,8 @@ int main(const int argc, const char* argv[])
         simulator.run();
     }
 
-    catch( const std::runtime_error& ex )
+    catch( ... )
     {
-        cerr << ex.what() << endl;
         cerr << "Aborting program..."<< endl;
         return EXIT_FAILURE;
     }

@@ -5,6 +5,9 @@ Simulator::Simulator(const string &configFile)
 {
     const string ERROR_MESSAGE = "Could not create the simulator";
 
+    processCount_ = 0;
+    processText = "Process 1: ";
+
     // Load configuration data
     if(!parseConfigurationFile(configFile))
     {
@@ -18,7 +21,7 @@ Simulator::Simulator(const string &configFile)
     }
 
     // Set how precise the times should be when displayed
-    cout.precision(6);
+    cout.precision(TRAILING_PRECISION);
 
     // Open the log file if necessary
     if(configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE)
@@ -41,12 +44,14 @@ void Simulator::display(const string &output)
 
     if( configurationData.loggingMode |  LOG_TO_BOTH | LOG_TO_MONITOR )
     {
-        cout << fixed << timePassed << " - " << output << endl;
+        cout << setw(LEADING_PRECISION) << setfill('0')
+             << fixed << timePassed << " - " << output << endl;
     }
 
     if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
     {
-        logFile_ << fixed << timePassed << " - " << output << endl;
+        logFile_ << setw(LEADING_PRECISION) << setfill('0')
+                 << fixed << timePassed << " - " << output << endl;
     }
 }
 
@@ -119,7 +124,10 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
 
     // File Information
     configurationData.version = GetNextToken();
-    checkVersion();
+    if(!checkVersion())
+    {
+        return false;
+    }
 
     // Metadata path
     configurationData.filePath = GetNextToken();
@@ -152,11 +160,76 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
 
 bool Simulator::parseMetaData()
 {
+    string lineBuffer;
+    string filePath = configurationData.filePath;
+    Program program;
+
+    const string END_SIMULATOR_STRING = "S(end)0.";
+    const string BEGIN_PROGRAM_STRING = "A(start)0";
+    const string END_PROGRAM_STRING   = "A(end)0";
+
+    // Open the file for reading
+    ifstream inFile(filePath.c_str());
+    if(inFile.fail())
+    {
+        cerr << "Error! Failed to open Meta-Data file." << endl;
+        return false;
+    }
+
+    // Check first line
+    getline(inFile, lineBuffer);
+    if(lineBuffer != "Start Program Meta-Data Code:")
+    {
+        cerr << "Error! Invalid Meta-Data file." << endl;
+        if(inFile.is_open())
+        {
+            inFile.close();
+        }
+        return false;
+    }
+
+    // Get each token delimited by semicolons
+    while(lineBuffer.find(END_SIMULATOR_STRING) == string::npos)
+    {
+        // Ignore whitespace
+        inFile >> std::ws;
+
+        // Get the next operation
+        getline(inFile, lineBuffer, ';');
+
+        if(lineBuffer == BEGIN_PROGRAM_STRING)
+        {
+            program.clearOperations();
+        }
+        else if(lineBuffer == END_PROGRAM_STRING)
+        {
+            programs_.push(program);
+        }
+        else
+        {
+            program.addOperation(lineBuffer);
+        }
+    }
+
+    // Close the file
+    if(inFile.is_open())
+    {
+        inFile.close();
+    }
+
     return true;
 }
 
 void Simulator::run()
 {
+    const string ERROR_MESSAGE  =
+        "No scheduling code specified. Aborting Simulator.";
+
+    // Begin the simulation
+    initialTime_ = chrono::high_resolution_clock::now();
+    display("Simulator program starting");
+    display("OS: preparing all processes");
+
     // Execute all operations in the queue
     switch(configurationData.schedulingCode)
     {
@@ -177,7 +250,15 @@ void Simulator::run()
             executeSRTFN();
             break;
         }
+
+        default:
+        {
+            cerr << ERROR_MESSAGE << endl;
+        }
     }
+
+    // End the simulation
+    display("Simulator program ending");
 }
 
 void Simulator::handleIO(const Operation& operation)
@@ -197,27 +278,27 @@ void Simulator::handleIO(const Operation& operation)
         }
 
         // display output
-        display("Process 1: start hard drive " + type);
+        display(processText + "start hard drive " + type);
         wait(operation.cycleTime() * configurationData.hardDriveCycleTime);
-        display("Process 1: end hard drive " + type);
+        display(processText + "end hard drive " + type);
     }
     else if(operation.description() == "keyboard")
     {
-        display("Process 1: start keyboard input");
+        display(processText + "start keyboard input");
         wait(operation.cycleTime() * configurationData.keyboardCycleTime);
-        display("Process 1: end keyboard input");
+        display(processText + "end keyboard input");
     }
     else if(operation.description() == "printer")
     {
-        display("Process 1: start printer output");
+        display(processText + "start printer output");
         wait(operation.cycleTime() * configurationData.printerCycleTime);
-        display("Process 1: end printer output");
+        display(processText + "end printer output");
     }
     else if(operation.description() == "monitor")
     {
-        display("Process 1: start monitor output");
+        display(processText + "start monitor output");
         wait(operation.cycleTime() * configurationData.monitorDisplayTime);
-        display("Process 1: end monitor output");
+        display(processText + "end monitor output");
     }
 }
 
@@ -225,42 +306,12 @@ void Simulator::handleOperation(const Operation& operation)
 {
     switch(operation.id())
     {
-        // Simulator
-        case 'S':
-        {
-            if(operation.description() == "start")
-            {
-                initialTime_ = chrono::high_resolution_clock::now();
-                display("Simulator program starting");
-            }
-            else if(operation.description() == "end")
-            {
-                display("Simulator program ending");
-            }
-            break;
-        }
-
-        // Application
-        case 'A':
-        {
-            if(operation.description() == "start")
-            {
-                display("OS: preparing process 1");
-                display("OS: starting process 1");
-            }
-            else if(operation.description() == "end")
-            {
-                display("OS: removing process 1");
-            }
-            break;
-        }
-
         // Processing
         case 'P':
         {
-            display("Process 1: start processing action");
+            display(processText + "start processing action");
             wait(operation.cycleTime() * configurationData.processorCycleTime);
-            display("Process 1: start processing action");
+            display(processText + "end processing action");
             break;
         }
 
@@ -272,8 +323,8 @@ void Simulator::handleOperation(const Operation& operation)
             thread IO_Thread(
                     [this, operation]()
                     {
-                    // Run this function when the thread executes
-                    handleIO(operation);
+                        // Run this function when the thread executes
+                        handleIO(operation);
                     });
 
             // Join it to wait for the thread to complete
@@ -289,7 +340,7 @@ void Simulator::handleOperation(const Operation& operation)
 
 bool Simulator::setLoggingMode( const string &loggingMode )
 {
-    string errorMessage =
+    const string ERROR_MESSAGE =
         "Invalid loggingMode specified. Could not set logging mode.";
 
     if(loggingMode == "Both")
@@ -306,7 +357,7 @@ bool Simulator::setLoggingMode( const string &loggingMode )
     }
     else
     {
-        displayErrorMessage(errorMessage);
+        displayErrorMessage(ERROR_MESSAGE);
         return false;
     }
 
@@ -318,7 +369,7 @@ bool Simulator::setSchedulingCode(const string &schedulingCode)
     const string ERROR_MESSAGE =
         "Invalid scheduling code specified. Could not set scheduling code";
 
-    if(schedulingCode == "FCFS")
+    if(schedulingCode == "FCFS" || schedulingCode == "FIFO")
     {
         configurationData.schedulingCode = FCFS;
     }
@@ -358,3 +409,40 @@ void Simulator::displayErrorMessage(const string &message) const
     cerr << "Error: " << message << endl;
 }
 
+void Simulator::executeFCFS()
+{
+    while(!programs_.empty())
+    {
+        displayLoadProcessText();
+        programs_.front().run();
+        for(auto operation : programs_.front().operations())
+        {
+            handleOperation(operation);
+        }
+
+        displayRemoveProcessText();
+        programs_.front().exit();
+        programs_.pop();
+    }
+}
+
+void Simulator::executeSJF()
+{
+}
+
+void Simulator::executeSRTFN()
+{
+}
+
+void Simulator::displayLoadProcessText()
+{
+    processCount_++;
+    processText = "Process " + to_string(processCount_) + ": ";
+    display("OS: selecting next process");
+    display("OS: starting process " + to_string(processCount_));
+}
+
+void Simulator::displayRemoveProcessText()
+{
+    display("OS: removing process " + to_string(processCount_));
+}
