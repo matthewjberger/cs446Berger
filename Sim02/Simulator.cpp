@@ -1,7 +1,7 @@
 #include "Simulator.h"
 using namespace std;
 
-Simulator::Simulator(const string &configFile)
+Simulator::Simulator( const string &configFile )
 {
     const string ERROR_MESSAGE = "Could not create the simulator";
 
@@ -9,48 +9,48 @@ Simulator::Simulator(const string &configFile)
     processText = "Process 1: ";
 
     // Load configuration data
-    if(!parseConfigurationFile(configFile))
+    if(!parseConfigurationFile( configFile ))
     {
-        throw new std::runtime_error(ERROR_MESSAGE);
+        throw new std::runtime_error( ERROR_MESSAGE );
     }
 
     // Load metadata
     if(!parseMetaData())
     {
-        throw new std::runtime_error(ERROR_MESSAGE);
+        throw new std::runtime_error( ERROR_MESSAGE );
     }
 
     // Set how precise the times should be when displayed
-    cout.precision(TRAILING_PRECISION);
+    cout.precision( TRAILING_PRECISION );
 
     // Open the log file if necessary
-    if(configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE)
+    if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
     {
-        logFile_.open(configurationData.logFilePath);
+        logFile_.open( configurationData.logFilePath );
     }
 }
 
 Simulator::~Simulator()
 {
-    if(logFile_.is_open())
+    if( logFile_.is_open() )
     {
         logFile_.close();
     }
 }
 
-void Simulator::display(const string &output)
+void Simulator::display( const string &output )
 {
     const auto timePassed = secondsPassed().count();
 
     if( configurationData.loggingMode |  LOG_TO_BOTH | LOG_TO_MONITOR )
     {
-        cout << setw(LEADING_PRECISION) << setfill('0')
+        cout << setw( LEADING_PRECISION ) << setfill( '0' )
              << fixed << timePassed << " - " << output << endl;
     }
 
     if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
     {
-        logFile_ << setw(LEADING_PRECISION) << setfill('0')
+        logFile_ << setw( LEADING_PRECISION ) << setfill( '0' )
                  << fixed << timePassed << " - " << output << endl;
     }
 }
@@ -59,15 +59,15 @@ chrono::duration<double> Simulator::secondsPassed()
 {
     // Get the time in seconds passed since the simulator was started
     currentTime_ = chrono::high_resolution_clock::now();
-    return (currentTime_ - initialTime_);
+    return ( currentTime_ - initialTime_ );
 }
 
-void Simulator::wait(int milliseconds) const
+void Simulator::wait( int milliseconds ) const
 {
-    this_thread::sleep_for(chrono::milliseconds(milliseconds));
+    this_thread::sleep_for( chrono::milliseconds( milliseconds ) );
 }
 
-bool Simulator::parseConfigurationFile(const std::string &configFile)
+bool Simulator::parseConfigurationFile( const std::string &configFile )
 {
     // Variables
     string lineBuffer;
@@ -77,12 +77,12 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
     ifstream inFile;
 
     // Define an error lambda
-    auto HandleError = [this, INVALID_FILE_MESSAGE, &inFile]()
+    auto HandleError = [ this, INVALID_FILE_MESSAGE, &inFile ]()
     {
-        displayErrorMessage(INVALID_FILE_MESSAGE);
+        displayErrorMessage( INVALID_FILE_MESSAGE );
 
         // Make sure the file is closed properly
-        if(inFile.is_open())
+        if( inFile.is_open() )
         {
             inFile.close();
         }
@@ -91,30 +91,30 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
     };
 
     // Open the file for reading
-    inFile.open(configFile.c_str());
+    inFile.open( configFile.c_str() );
 
     // If file failed to open
-    if(inFile.fail())
+    if( inFile.fail() )
     {
         return HandleError();
     }
 
     // Check first line
-    getline(inFile, lineBuffer);
+    getline( inFile, lineBuffer );
 
-    if(lineBuffer != "Start Simulator Configuration File")
+    if( lineBuffer != "Start Simulator Configuration File" )
     {
         return HandleError();
     }
 
     // Declare a lambda to handle repeatedly getting input
-    auto GetNextToken = [&inFile, LIMIT](const bool ignoreActive = true)
+    auto GetNextToken = [ &inFile, LIMIT ]( const bool ignoreActive = true )
     {
         string nextToken;
 
         if(ignoreActive)
         {
-            inFile.ignore(LIMIT, ':');
+            inFile.ignore( LIMIT, ':' );
         }
 
         inFile >> nextToken;
@@ -124,7 +124,7 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
 
     // File Information
     configurationData.version = GetNextToken();
-    if(!checkVersion())
+    if( !checkVersion() )
     {
         return false;
     }
@@ -133,24 +133,24 @@ bool Simulator::parseConfigurationFile(const std::string &configFile)
     configurationData.filePath = GetNextToken();
 
     // Scheduling code
-    setSchedulingCode(GetNextToken());
+    setSchedulingCode( GetNextToken() );
 
     // Cycle times
-    configurationData.processorCycleTime = stoi(GetNextToken());
-    configurationData.monitorDisplayTime = stoi(GetNextToken());
-    configurationData.hardDriveCycleTime = stoi(GetNextToken());
-    configurationData.printerCycleTime   = stoi(GetNextToken());
-    configurationData.keyboardCycleTime  = stoi(GetNextToken());
+    configurationData.processorCycleTime = stoi( GetNextToken() );
+    configurationData.monitorDisplayTime = stoi( GetNextToken() );
+    configurationData.hardDriveCycleTime = stoi( GetNextToken() );
+    configurationData.printerCycleTime   = stoi( GetNextToken() );
+    configurationData.keyboardCycleTime  = stoi( GetNextToken() );
 
     // Get logging mode
     GetNextToken(); // 'Log'
-    GetNextToken(DONT_IGNORE); // 'to'
-    setLoggingMode(GetNextToken(DONT_IGNORE)); // 'Both/File/Monitor'
+    GetNextToken( DONT_IGNORE ); // 'to'
+    setLoggingMode( GetNextToken(DONT_IGNORE) ); // 'Both/File/Monitor'
 
     // Log File Path
     configurationData.logFilePath = GetNextToken();
 
-    if(inFile.is_open())
+    if( inFile.is_open() )
     {
         inFile.close();
     }
@@ -172,19 +172,19 @@ bool Simulator::parseMetaData()
     const string END_PROGRAM_STRING     = "A(end)0";
 
     // Open the file for reading
-    ifstream inFile(filePath.c_str());
-    if(inFile.fail())
+    ifstream inFile( filePath.c_str() );
+    if( inFile.fail() )
     {
         cerr << "Error! Failed to open Meta-Data file." << endl;
         return false;
     }
 
     // Check first line
-    getline(inFile, lineBuffer);
-    if(lineBuffer != "Start Program Meta-Data Code:")
+    getline( inFile, lineBuffer );
+    if( lineBuffer != "Start Program Meta-Data Code:" )
     {
         cerr << "Error! Invalid Meta-Data file." << endl;
-        if(inFile.is_open())
+        if( inFile.is_open() )
         {
             inFile.close();
         }
@@ -198,38 +198,39 @@ bool Simulator::parseMetaData()
         inFile >> std::ws;
 
         // Get the next operation
-        getline(inFile, lineBuffer, ';');
+        getline( inFile, lineBuffer, ';' );
 
         // Check if at the end
-        doneParsing = lineBuffer.find(END_SIMULATOR_STRING) != string::npos;
+        doneParsing = lineBuffer.find( END_SIMULATOR_STRING ) != string::npos;
 
-        if(lineBuffer == BEGIN_PROGRAM_STRING)
+        if( lineBuffer == BEGIN_PROGRAM_STRING )
         {
             program.clearOperations();
         }
-        else if(lineBuffer == END_PROGRAM_STRING)
+        else if( lineBuffer == END_PROGRAM_STRING )
         {
-            programs_.push_back(program);
+            programs_.push_back( program );
+            programs_.back().prepare();
         }
-        else if( (lineBuffer != BEGIN_SIMULATOR_STRING) && !doneParsing)
+        else if( ( lineBuffer != BEGIN_SIMULATOR_STRING ) && !doneParsing )
         {
-            if(lineBuffer.find("printer") != string::npos)
+            if( lineBuffer.find( "printer" ) != string::npos )
             {
                 hardwareCycleTime = configurationData.printerCycleTime;
             }
-            else if(lineBuffer.find("monitor") != string::npos)
+            else if( lineBuffer.find( "monitor" ) != string::npos )
             {
                 hardwareCycleTime = configurationData.monitorDisplayTime;
             }
-            else if(lineBuffer.find("keyboard") != string::npos)
+            else if( lineBuffer.find( "keyboard" ) != string::npos )
             {
                 hardwareCycleTime = configurationData.keyboardCycleTime;
             }
-            else if(lineBuffer.find("run") != string::npos)
+            else if( lineBuffer.find( "run" ) != string::npos )
             {
                 hardwareCycleTime = configurationData.processorCycleTime;
             }
-            else if(lineBuffer.find("hard drive") != string::npos)
+            else if( lineBuffer.find( "hard drive" ) != string::npos )
             {
                 hardwareCycleTime = configurationData.hardDriveCycleTime;
             }
@@ -245,7 +246,7 @@ bool Simulator::parseMetaData()
                 return false;
             }
 
-            program.addOperation(lineBuffer, hardwareCycleTime);
+            program.addOperation( lineBuffer, hardwareCycleTime );
         }
     }
 
@@ -265,11 +266,11 @@ void Simulator::run()
 
     // Begin the simulation
     initialTime_ = chrono::high_resolution_clock::now();
-    display("Simulator program starting");
-    display("OS: preparing all processes");
+    display( "Simulator program starting" );
+    display( "OS: preparing all processes" );
 
     // Execute all operations in the queue
-    switch(configurationData.schedulingCode)
+    switch( configurationData.schedulingCode )
     {
         case FCFS:
         {
@@ -296,60 +297,60 @@ void Simulator::run()
     }
 
     // End the simulation
-    display("Simulator program ending");
+    display( "Simulator program ending" );
 }
 
-void Simulator::handleIO(const Operation& operation)
+void Simulator::handleIO( const Operation& operation )
 {
     string type;
 
     // Handle specific types of IO
-    if(operation.description() == "hard drive")
+    if( operation.description() == "hard drive" )
     {
-        if(operation.id() == 'I')
+        if( operation.id() == 'I' )
         {
             type = "input";
         }
-        else if(operation.id() == 'O')
+        else if( operation.id() == 'O' )
         {
             type = "output";
         }
 
         // display output
-        display(processText + "start hard drive " + type);
-        wait(operation.duration());
-        display(processText + "end hard drive " + type);
+        display( processText + "start hard drive " + type );
+        wait( operation.duration() );
+        display( processText + "end hard drive " + type );
     }
-    else if(operation.description() == "keyboard")
+    else if( operation.description() == "keyboard" )
     {
-        display(processText + "start keyboard input");
-        wait(operation.duration());
-        display(processText + "end keyboard input");
+        display( processText + "start keyboard input" );
+        wait( operation.duration() );
+        display( processText + "end keyboard input" );
     }
-    else if(operation.description() == "printer")
+    else if( operation.description() == "printer" )
     {
-        display(processText + "start printer output");
-        wait(operation.duration());
-        display(processText + "end printer output");
+        display( processText + "start printer output" );
+        wait( operation.duration() );
+        display( processText + "end printer output" );
     }
-    else if(operation.description() == "monitor")
+    else if( operation.description() == "monitor" )
     {
-        display(processText + "start monitor output");
-        wait(operation.duration());
-        display(processText + "end monitor output");
+        display( processText + "start monitor output" );
+        wait( operation.duration() );
+        display( processText + "end monitor output" );
     }
 }
 
-void Simulator::handleOperation(const Operation& operation)
+void Simulator::handleOperation( const Operation& operation )
 {
-    switch(operation.id())
+    switch( operation.id() )
     {
         // Processing
         case 'P':
         {
-            display(processText + "start processing action");
-            wait(operation.duration());
-            display(processText + "end processing action");
+            display( processText + "start processing action" );
+            wait( operation.duration() );
+            display( processText + "end processing action" );
             break;
         }
 
@@ -359,14 +360,14 @@ void Simulator::handleOperation(const Operation& operation)
         {
             // Create a new thread for the IO operation
             thread IO_Thread(
-                    [this, operation]()
+                    [ this, operation ]()
                     {
                         // Run this function when the thread executes
-                        handleIO(operation);
+                        handleIO( operation );
                     });
 
             // Join it to wait for the thread to complete
-            if(IO_Thread.joinable())
+            if( IO_Thread.joinable() )
             {
                 IO_Thread.join();
             }
@@ -402,26 +403,26 @@ bool Simulator::setLoggingMode( const string &loggingMode )
     return true;
 }
 
-bool Simulator::setSchedulingCode(const string &schedulingCode)
+bool Simulator::setSchedulingCode( const string &schedulingCode )
 {
     const string ERROR_MESSAGE =
         "Invalid scheduling code specified. Could not set scheduling code";
 
-    if(schedulingCode == "FCFS" || schedulingCode == "FIFO")
+    if( schedulingCode == "FCFS" || schedulingCode == "FIFO" )
     {
         configurationData.schedulingCode = FCFS;
     }
-    else if(schedulingCode == "SJF")
+    else if( schedulingCode == "SJF" )
     {
         configurationData.schedulingCode = SJF;
     }
-    else if(schedulingCode == "SRTF_N")
+    else if( schedulingCode == "SRTF_N" )
     {
         configurationData.schedulingCode = SRTF_N;
     }
     else
     {
-        displayErrorMessage(ERROR_MESSAGE);
+        displayErrorMessage( ERROR_MESSAGE );
         return false;
     }
 
@@ -433,16 +434,16 @@ bool Simulator::checkVersion() const
     const string ERROR_MESSAGE =
         "Invalid version specified in configuration file";
 
-    if(configurationData.version != VERSION)
+    if( configurationData.version != VERSION )
     {
-        displayErrorMessage(ERROR_MESSAGE);
+        displayErrorMessage( ERROR_MESSAGE );
         return false;
     }
 
     return true;
 }
 
-void Simulator::displayErrorMessage(const string &message) const
+void Simulator::displayErrorMessage( const string &message ) const
 {
     cerr << "Error: " << message << endl;
 }
@@ -453,9 +454,9 @@ void Simulator::executeFCFS()
     {
         displayLoadProcessText();
         programs_.front().run();
-        for(auto operation : programs_.front().operations())
+        for( auto operation : programs_.front().operations() )
         {
-            handleOperation(operation);
+            handleOperation( operation );
         }
 
         displayRemoveProcessText();
@@ -471,13 +472,13 @@ void Simulator::executeSJF()
 
     // Declare how we will sort the programs
     auto SortByDuration =
-    [](const Program &program_1, const Program &program_2) -> bool
+    []( const Program &program_1, const Program &program_2 ) -> bool
     {
-        return (program_1.duration() < program_2.duration());
+        return ( program_1.duration() < program_2.duration() );
     };
 
     // Execute the sort in place
-    programs_.sort(SortByDuration);
+    programs_.sort( SortByDuration );
 
     // Execute in order
     executeFCFS();
@@ -490,12 +491,12 @@ void Simulator::executeSRTFN()
 void Simulator::displayLoadProcessText()
 {
     processCount_++;
-    processText = "Process " + to_string(processCount_) + ": ";
-    display("OS: selecting next process");
-    display("OS: starting process " + to_string(processCount_));
+    processText = "Process " + to_string( processCount_ ) + ": ";
+    display( "OS: selecting next process" );
+    display( "OS: starting process " + to_string( processCount_ ) );
 }
 
 void Simulator::displayRemoveProcessText()
 {
-    display("OS: removing process " + to_string(processCount_));
+    display( "OS: removing process " + to_string( processCount_ ) );
 }

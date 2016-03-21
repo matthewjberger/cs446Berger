@@ -49,6 +49,7 @@ class Program
 
         void run();
         void exit();
+        void prepare();
         void addOperation( const std::string &operationString,
                            int hardwareCycleTime );
         void clearOperations();

@@ -83,6 +83,9 @@ class Simulator
         // Returns the amount of time that has passed
         std::chrono::duration<double> secondsPassed();
 
+        // A queue for SRTFN scheduling
+        std::queue<Program> programsSRTFN_;
+
         // Scheduling Handlers
         void executeFCFS();
         void executeSJF();

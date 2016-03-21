@@ -70,6 +70,11 @@ void Program::exit()
     processControlBlock.state = EXIT;
 }
 
+void Program::prepare()
+{
+    processControlBlock.state = READY;
+}
+
 int Program::duration() const
 {
     return processControlBlock.totalTime;

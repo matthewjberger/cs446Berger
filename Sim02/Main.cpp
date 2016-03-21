@@ -2,7 +2,7 @@
 using namespace std;
 
 // Utility Functions
-int main(const int argc, const char* argv[])
+int main( const int argc, const char* argv[] )
 {
     string configurationFile;
 
@@ -15,7 +15,7 @@ int main(const int argc, const char* argv[])
 
     // Ensure the file exists
     configurationFile = argv[1];
-    if(access(configurationFile.c_str(), F_OK) == -1)
+    if( access( configurationFile.c_str(), F_OK ) == -1 )
     {
         cerr << "Configuration file does not exist!" << endl;
         return EXIT_FAILURE;
@@ -24,7 +24,7 @@ int main(const int argc, const char* argv[])
     try
     {
         // Run the simulator
-        Simulator simulator(configurationFile);
+        Simulator simulator( configurationFile );
         simulator.run();
     }
 
