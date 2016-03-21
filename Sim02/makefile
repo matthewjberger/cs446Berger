@@ -41,4 +41,4 @@ $(EXE_NAME): $(OBJECTS)
 
 # Remove all object files
 clean: $(OBJECTS)
-	-rm $(OBJECTS)
+	-rm $(OBJECTS) && rm $(EXE_NAME)

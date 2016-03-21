@@ -162,6 +162,7 @@ bool Simulator::parseMetaData()
 {
     string lineBuffer;
     string filePath = configurationData.filePath;
+    int hardwareCycleTime;
     Program program;
 
     const string END_SIMULATOR_STRING = "S(end)0.";
@@ -203,11 +204,32 @@ bool Simulator::parseMetaData()
         }
         else if(lineBuffer == END_PROGRAM_STRING)
         {
-            programs_.push(program);
+            programs_.push_back(program);
         }
         else
         {
-            program.addOperation(lineBuffer);
+            if(lineBuffer.find("printer") != string::npos)
+            {
+                hardwareCycleTime = configurationData.printerCycleTime;
+            }
+            else if(lineBuffer.find("monitor") != string::npos)
+            {
+                hardwareCycleTime = configurationData.monitorDisplayTime;
+            }
+            else if(lineBuffer.find("keyboard") != string::npos)
+            {
+                hardwareCycleTime = configurationData.keyboardCycleTime;
+            }
+            else if(lineBuffer.find("processor") != string::npos)
+            {
+                hardwareCycleTime = configurationData.processorCycleTime;
+            }
+            else if(lineBuffer.find("hard drive") != string::npos)
+            {
+                hardwareCycleTime = configurationData.hardDriveCycleTime;
+            }
+
+            program.addOperation(lineBuffer, hardwareCycleTime);
         }
     }
 
@@ -279,25 +301,25 @@ void Simulator::handleIO(const Operation& operation)
 
         // display output
         display(processText + "start hard drive " + type);
-        wait(operation.cycleTime() * configurationData.hardDriveCycleTime);
+        wait(operation.duration());
         display(processText + "end hard drive " + type);
     }
     else if(operation.description() == "keyboard")
     {
         display(processText + "start keyboard input");
-        wait(operation.cycleTime() * configurationData.keyboardCycleTime);
+        wait(operation.duration());
         display(processText + "end keyboard input");
     }
     else if(operation.description() == "printer")
     {
         display(processText + "start printer output");
-        wait(operation.cycleTime() * configurationData.printerCycleTime);
+        wait(operation.duration());
         display(processText + "end printer output");
     }
     else if(operation.description() == "monitor")
     {
         display(processText + "start monitor output");
-        wait(operation.cycleTime() * configurationData.monitorDisplayTime);
+        wait(operation.duration());
         display(processText + "end monitor output");
     }
 }
@@ -310,7 +332,7 @@ void Simulator::handleOperation(const Operation& operation)
         case 'P':
         {
             display(processText + "start processing action");
-            wait(operation.cycleTime() * configurationData.processorCycleTime);
+            wait(operation.duration());
             display(processText + "end processing action");
             break;
         }
@@ -422,12 +444,27 @@ void Simulator::executeFCFS()
 
         displayRemoveProcessText();
         programs_.front().exit();
-        programs_.pop();
+        programs_.pop_front();
     }
 }
 
 void Simulator::executeSJF()
 {
+    // Same as FCFS except the programs are
+    // sorted by their duration in the PCB
+
+    // Declare how we will sort the programs
+    auto SortByDuration =
+    [](const Program &program_1, const Program &program_2) -> bool
+    {
+        return (program_1.duration() < program_2.duration());
+    };
+
+    // Execute the sort in place
+    programs_.sort(SortByDuration);
+
+    // Execute in order
+    executeFCFS();
 }
 
 void Simulator::executeSRTFN()

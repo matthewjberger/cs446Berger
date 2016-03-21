@@ -15,6 +15,8 @@
 #include <limits>
 #include <stdexcept>
 #include <iomanip>
+#include <algorithm>
+#include <list>
 
 #include "Program.h"
 
@@ -96,7 +98,7 @@ class Simulator
         void displayLoadProcessText();
 
         /***** Member Variables *****/
-        std::queue<Program> programs_;
+        std::list<Program> programs_;
 
         std::ofstream logFile_;
 

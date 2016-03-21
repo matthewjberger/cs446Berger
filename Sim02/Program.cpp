@@ -14,7 +14,8 @@ Program::~Program()
     clearOperations();
 }
 
-void Program::addOperation(const std::string &operationString)
+void Program::addOperation( const std::string &operationString,
+                            int hardwareCycleTime )
 {
     // Operation format is "S(start)0"
 
@@ -29,27 +30,26 @@ void Program::addOperation(const std::string &operationString)
     string description = operationString.substr( beginning, end );
 
     // Get the duration
-    string cycleTimeString = operationString.substr( secondParenLoc + 1 );
-    int cycleTime          = stoi(cycleTimeString);
+    string cyclesString = operationString.substr( secondParenLoc + 1 );
+    int cycles = stoi( cyclesString );
+    int duration = ( cycles * hardwareCycleTime );
 
     // Add the operation
-    Operation operation(id, description, cycleTime);
-    operations_.push_back(operation);
+    Operation operation( id, description, duration );
+    operations_.push_back( operation );
+
+    // Update the program duration
+    processControlBlock.totalTime += operations_.front().duration();
 }
 
-int Program::processID()
+int Program::processID() const
 {
     return processControlBlock.processID;
 }
 
-void Program::updateTotalTime( int time )
-{
-    processControlBlock.totalTime = time;
-}
-
 void Program::clearOperations()
 {
-    if(!operations_.empty())
+    if( !operations_.empty() )
     {
         operations_.clear();
     }
@@ -70,14 +70,19 @@ void Program::exit()
     processControlBlock.state = EXIT;
 }
 
+int Program::duration() const
+{
+    return processControlBlock.totalTime;
+}
+
 /****** Operation ******/
 Operation::Operation( const char id,
                       const std::string &description,
-                      const int cycleTime )
+                      const int duration )
 {
     this->id_          = id;
     this->description_ = description;
-    this->cycleTime_   = cycleTime;
+    this->duration_    = duration;
 
 }
 
@@ -86,9 +91,9 @@ char Operation::id() const
     return id_;
 }
 
-int Operation::cycleTime() const
+int Operation::duration() const
 {
-    return cycleTime_;
+    return duration_;
 }
 
 std::string Operation::description() const

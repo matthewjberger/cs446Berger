@@ -22,20 +22,22 @@ class Operation
 
         Operation( const char id,
                    const std::string &description,
-                   const int cycleTime );
+                   const int duration  );
 
         char id() const;
         std::string description() const;
-        int cycleTime() const;
+        int duration() const;
 
     private:
 
-        char id_; // S, A, P, I, O
+        // S, A, P, I, O
+        char id_;
 
         // start, end, run, hard drive, keyboard, printer, monitor
         std::string description_;
 
-        int cycleTime_;// Number of cycles the operation takes
+        // The amount of time the operation takes to complete
+        int duration_;
 };
 
 class Program
@@ -47,10 +49,11 @@ class Program
 
         void run();
         void exit();
-        void updateTotalTime( int time );
-        void addOperation( const std::string &operationString );
+        void addOperation( const std::string &operationString,
+                           int hardwareCycleTime );
         void clearOperations();
-        int processID();
+        int processID() const;
+        int duration() const;
         std::list<Operation> operations();
 
     private:
