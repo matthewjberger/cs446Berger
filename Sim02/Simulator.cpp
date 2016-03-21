@@ -163,11 +163,13 @@ bool Simulator::parseMetaData()
     string lineBuffer;
     string filePath = configurationData.filePath;
     int hardwareCycleTime;
+    bool doneParsing = false;
     Program program;
 
-    const string END_SIMULATOR_STRING = "S(end)0.";
-    const string BEGIN_PROGRAM_STRING = "A(start)0";
-    const string END_PROGRAM_STRING   = "A(end)0";
+    const string BEGIN_SIMULATOR_STRING = "S(start)0";
+    const string END_SIMULATOR_STRING   = "S(end)0.";
+    const string BEGIN_PROGRAM_STRING   = "A(start)0";
+    const string END_PROGRAM_STRING     = "A(end)0";
 
     // Open the file for reading
     ifstream inFile(filePath.c_str());
@@ -190,13 +192,16 @@ bool Simulator::parseMetaData()
     }
 
     // Get each token delimited by semicolons
-    while(lineBuffer.find(END_SIMULATOR_STRING) == string::npos)
+    while( !doneParsing )
     {
         // Ignore whitespace
         inFile >> std::ws;
 
         // Get the next operation
         getline(inFile, lineBuffer, ';');
+
+        // Check if at the end
+        doneParsing = lineBuffer.find(END_SIMULATOR_STRING) != string::npos;
 
         if(lineBuffer == BEGIN_PROGRAM_STRING)
         {
@@ -206,7 +211,7 @@ bool Simulator::parseMetaData()
         {
             programs_.push_back(program);
         }
-        else
+        else if( (lineBuffer != BEGIN_SIMULATOR_STRING) && !doneParsing)
         {
             if(lineBuffer.find("printer") != string::npos)
             {
@@ -220,13 +225,24 @@ bool Simulator::parseMetaData()
             {
                 hardwareCycleTime = configurationData.keyboardCycleTime;
             }
-            else if(lineBuffer.find("processor") != string::npos)
+            else if(lineBuffer.find("run") != string::npos)
             {
                 hardwareCycleTime = configurationData.processorCycleTime;
             }
             else if(lineBuffer.find("hard drive") != string::npos)
             {
                 hardwareCycleTime = configurationData.hardDriveCycleTime;
+            }
+            else
+            {
+                cerr << "Error! Invalid Meta-Data file. "
+                     << "Could not set operation hardware cycle!" << endl;
+
+                if(inFile.is_open())
+                {
+                    inFile.close();
+                }
+                return false;
             }
 
             program.addOperation(lineBuffer, hardwareCycleTime);
