@@ -57,7 +57,13 @@ class Program
         int duration() const;
         std::list<Operation> operations();
 
+        Operation nextOperation();
+
+        bool operator>(const Program &other) const;
+
     private:
+
+        std::list<Operation>::const_iterator currentOperation;
 
         std::list<Operation> operations_;
 
@@ -65,7 +71,7 @@ class Program
         {
             int state;
             int processID;
-            int totalTime; // Sum of time taken by operations
+            int remainingTime;
         } processControlBlock;
 };
 

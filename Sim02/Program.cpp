@@ -6,7 +6,9 @@ Program::Program()
 {
     processControlBlock.state      = NEW;
     processControlBlock.processID  = 0;
-    processControlBlock.totalTime  = 0;
+    processControlBlock.remainingTime  = 0;
+
+    currentOperation = operations_.begin();
 }
 
 Program::~Program()
@@ -39,7 +41,7 @@ void Program::addOperation( const std::string &operationString,
     operations_.push_back( operation );
 
     // Update the program duration
-    processControlBlock.totalTime += operations_.front().duration();
+    processControlBlock.remainingTime += operations_.front().duration();
 }
 
 int Program::processID() const
@@ -52,6 +54,7 @@ void Program::clearOperations()
     if( !operations_.empty() )
     {
         operations_.clear();
+        currentOperation = operations_.begin();
     }
 }
 
@@ -77,7 +80,24 @@ void Program::prepare()
 
 int Program::duration() const
 {
-    return processControlBlock.totalTime;
+    return processControlBlock.remainingTime;
+}
+
+Operation Program::nextOperation()
+{
+    processControlBlock.remainingTime -= currentOperation->duration();
+
+    if(currentOperation != operations_.end())
+    {
+        currentOperation++;
+    }
+
+    return *currentOperation;
+}
+
+bool Program::operator>(const Program &other) const
+{
+    return (duration() > other.duration());
 }
 
 /****** Operation ******/
