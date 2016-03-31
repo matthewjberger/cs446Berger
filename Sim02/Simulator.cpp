@@ -286,7 +286,7 @@ void Simulator::run()
 
         case SRTF_N:
         {
-            executeSRTFN();
+            //executeSRTFN();
             break;
         }
 
@@ -486,6 +486,7 @@ void Simulator::executeSJF()
 
 void Simulator::executeSRTFN()
 {
+    // Not implemented
 }
 
 void Simulator::displayLoadProcessText()
