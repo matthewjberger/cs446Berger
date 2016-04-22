@@ -42,7 +42,6 @@ Simulator::~Simulator()
             logFile_.close();
         }
     }
-
 }
 
 void Simulator::display( const string &output )
@@ -55,16 +54,16 @@ void Simulator::display( const string &output )
         cout << setw( LEADING_PRECISION ) << setfill( '0' )
              << fixed << timePassed << " - " << output << endl;
 
-        // If logging, write to a string stream and then log to file
-        // at the end of the program
-        if( configurationData.loggingMode == LOG_TO_BOTH ||
-            configurationData.loggingMode == LOG_TO_FILE )
-        {
-            logStream_ << setw( LEADING_PRECISION ) << setfill( '0' )
-                << fixed << timePassed << " - " << output << endl;
-        }
     }
 
+    // If logging, write to a string stream and then log to file
+    // at the end of the program
+    if( configurationData.loggingMode == LOG_TO_BOTH ||
+            configurationData.loggingMode == LOG_TO_FILE )
+    {
+        logStream_ << setw( LEADING_PRECISION ) << setfill( '0' )
+            << fixed << timePassed << " - " << output << endl;
+    }
 }
 
 chrono::duration<double> Simulator::secondsPassed()
