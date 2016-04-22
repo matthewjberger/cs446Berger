@@ -98,7 +98,7 @@ class Simulator
         void displayLoadProcessText();
         void executeProgram( Program* program );
 
-        std::list<Program> programs_;
+        std::vector<Program> programs_;
         std::stringstream logStream_;
 
         std::chrono::time_point<std::chrono::high_resolution_clock>
@@ -119,7 +119,7 @@ class Simulator
 
         using RR_Q = std::queue<Program>;
         using FIFO_Q =
-            std::priority_queue<Program, std::list<Program>, FIFOComparator>;
+            std::priority_queue<Program, std::vector<Program>, FIFOComparator>;
 
         std::queue<int> interrupts_;
 
