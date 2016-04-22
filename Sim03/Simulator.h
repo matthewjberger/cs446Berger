@@ -60,7 +60,7 @@ class Simulator
             int printerCycleTime;
             int keyboardCycleTime;
 
-            int quantumCycleTime;
+            int quantum;
 
             LoggingMode loggingMode;
             std::string logFilePath;
@@ -69,9 +69,6 @@ class Simulator
         } configurationData;
 
         /***** Member Functions *****/
-
-        // Handles Program operations
-        void handleOperation( const Operation& operation );
 
         // Handles IO with a unique thread
         void handleIO( const Operation& operation, int pid );

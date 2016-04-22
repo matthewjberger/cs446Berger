@@ -89,7 +89,7 @@ bool Program::operator>(const Program &other) const
 
 void Program::suspend()
 {
-    processControlBlock.state = WAITING;
+    processControlBlock.state = SUSPENDED;
 }
 
 int Program::operations_left() const
@@ -99,11 +99,6 @@ int Program::operations_left() const
 
 Operation Program::step()
 {
-    if(processControlBlock.completed)
-    {
-        return;
-    }
-
     if(!currentOperation_->completed())
     {
         if(currentOperation_ != operations_.end())
@@ -113,11 +108,11 @@ Operation Program::step()
         else
         {
             processControlBlock.completed = true;
-            return;
         }
     }
 
     currentOperation_->step();
+    return *currentOperation_;
 }
 
 PCB Program::process_control_block() const

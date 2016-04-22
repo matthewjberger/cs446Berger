@@ -160,7 +160,7 @@ bool Simulator::parseConfigurationFile( const std::string &configFile )
     setSchedulingCode( GetNextToken() );
 
     // Cycle times
-    configurationData.quantumCycleTime   = stoi( GetNextToken() );
+    configurationData.quantum            = stoi( GetNextToken() );
     configurationData.processorCycleTime = stoi( GetNextToken() );
     configurationData.monitorDisplayTime = stoi( GetNextToken() );
     configurationData.hardDriveCycleTime = stoi( GetNextToken() );
@@ -358,42 +358,6 @@ void Simulator::handleIO( const Operation& operation, int pid )
     interrupts_.push(pid);
 }
 
-void Simulator::handleOperation( const Operation& operation )
-{
-    switch( operation.parameters().id )
-    {
-        // Processing
-        case 'P':
-        {
-            display( processText + "start processing action" );
-            wait( operation.parameters().duration );
-            display( processText + "end processing action" );
-            break;
-        }
-
-        // I/O
-        case 'I':
-        case 'O':
-        {
-            // Create a new thread for the IO operation
-            thread IO_Thread(
-                    [ this, operation ]()
-                    {
-                        // Run this function when the thread executes
-                        handleIO( operation );
-                    });
-
-            // Join it to wait for the thread to complete
-            if( IO_Thread.joinable() )
-            {
-                IO_Thread.join();
-            }
-
-            break;
-        }
-    }
-}
-
 bool Simulator::setLoggingMode( const string &loggingMode )
 {
     const string ERROR_MESSAGE =
@@ -463,19 +427,6 @@ void Simulator::displayErrorMessage( const string &message ) const
     cerr << "Error: " << message << endl;
 }
 
-void Simulator::displayLoadProcessText()
-{
-    processCount_++;
-    processText = "Process " + to_string( processCount_ ) + ": ";
-    display( "OS: selecting next process" );
-    display( "OS: starting process " + to_string( processCount_ ) );
-}
-
-void Simulator::displayRemoveProcessText()
-{
-    display( "OS: removing process " + to_string( processCount_ ) );
-}
-
 Program Simulator::next(FIFO_Q* readyQueue)
 {
     Program nextProgram = readyQueue->top();
@@ -492,10 +443,8 @@ Program Simulator::next(RR_Q* readyQueue)
 
 void Simulator::executeRR()
 {
-    int programCounter = 0;
-
     // Create a ready queue
-    std::unique_ptr<FIFO_Q> readyQueue(new FIFO_Q);
+    std::unique_ptr<RR_Q> readyQueue(new RR_Q);
     for( Program program : programs_ )
     {
         program.prepare();
@@ -528,7 +477,18 @@ void Simulator::executeRR()
             Program program = next(readyQueue.get());
 
             // Execute the program until it is interupted
+            executeProgram(&program);
 
+            if( program.process_control_block().state == RUNNING )
+            {
+                program.prepare();
+                readyQueue->push(program);
+            }
+        }
+        else
+        {
+            display("OS Idle: Waiting for I/O to complete");
+            wait(30); // 30 millisecond idle before checking again
         }
     }
 }
@@ -536,8 +496,8 @@ void Simulator::executeRR()
 void Simulator::executeProgram( Program *program )
 {
     int pid = program->process_control_block().processID;
-    program->run();
     Operation operation = program->step();
+    char operationType = operation.parameters().id;
 
     // Create thread lambda
     auto ThreadStart = [this, operation, pid]()
@@ -545,19 +505,59 @@ void Simulator::executeProgram( Program *program )
         handleIO(operation, pid);
     };
 
-    if(operation.parameters().id == 'A' &&
-       operation.parameters().description == "start")
+    program->run();
+
+    // Start
+    if( operationType == 'A' &&
+        operation.parameters().description == "start")
     {
         display("OS: starting process " + to_string(pid));
         operation = program->step();
     }
 
-    if(operation.parameters().id == 'I' ||
-       operation.parameters().id == 'O')
+    // I/O
+    if( operationType == 'I' || operationType == 'O')
     {
         display("Process: " + to_string(pid) + ": starting I/O");
         thread IO_thread(ThreadStart);
         IO_thread.detach(); // async, do not block
+
+        program->suspend();
+        suspendedPrograms_[pid] = *program;
+    }
+
+    // Processing
+    else if( operationType == 'P' )
+    {
+        display("Process " + to_string(pid) + ": processing action");
+        int quantum = 0;
+        while( !operation.completed() && interrupts_.empty() )
+        {
+            quantum++;
+
+            operation.step();
+            wait( operation.parameters().cycleTime );
+
+            if( quantum == configurationData.quantum )
+            {
+                // Launch a quantum interrupt to stop execution of the program
+                interrupts_.push(0);
+                display("Interrupt: quantum expired");
+            }
+        }
+
+        if( operation.completed() )
+        {
+            display("Process " + to_string(pid) + ": end processing action");
+        }
+    }
+
+    // The last operation in a program is an exit operation
+    if( program->operations_left() <= 1 &&
+        program->process_control_block().state == SUSPENDED)
+    {
+        program->exit();
+        display("OS: removing process " + to_string(pid));
     }
 }
 

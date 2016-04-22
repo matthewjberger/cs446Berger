@@ -8,7 +8,7 @@
 
 enum States
 {
-    NEW, READY, RUNNING, WAITING, EXIT
+    NEW, READY, RUNNING, SUSPENDED, EXIT
 };
 
 struct PCB
