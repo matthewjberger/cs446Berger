@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <list>
+#include <map>
 
 #include "Program.h"
 
@@ -73,7 +74,7 @@ class Simulator
         void handleOperation( const Operation& operation );
 
         // Handles IO with a unique thread
-        void handleIO(const Operation& operation );
+        void handleIO( const Operation& operation, int pid );
 
         // Outputs to monitor, log, or both depending on current loggingMode
         void display( const std::string &output );
@@ -90,7 +91,6 @@ class Simulator
         // Scheduling Handlers
         void executeFIFOP();
         void executeRR();
-
         bool parseMetaData();
         bool parseConfigurationFile(const std::string &configFile );
         bool setLoggingMode( const std::string &loggingMode );
@@ -99,10 +99,9 @@ class Simulator
         void displayErrorMessage(const std::string &message) const;
         void displayRemoveProcessText();
         void displayLoadProcessText();
+        void executeProgram( Program* program );
 
-        /***** Member Variables *****/
         std::list<Program> programs_;
-
         std::stringstream logStream_;
 
         std::chrono::time_point<std::chrono::high_resolution_clock>
@@ -121,8 +120,17 @@ class Simulator
             }
         };
 
-        using FIFO_Q = std::priority_queue<Program, std::vector<Program>, FIFOComparator>;
         using RR_Q = std::queue<Program>;
-};
+        using FIFO_Q =
+            std::priority_queue<Program, std::list<Program>, FIFOComparator>;
+
+        std::queue<int> interrupts_;
+
+        std::map<int,Program> suspendedPrograms_;
+
+        Program next(RR_Q* readyQueue);
+        Program next(FIFO_Q* readyQueue);
+
+       };
 
 #endif

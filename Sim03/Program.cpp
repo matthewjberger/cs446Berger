@@ -97,7 +97,7 @@ int Program::operations_left() const
     return operations_.size();
 }
 
-void Program::step()
+Operation Program::step()
 {
     if(processControlBlock.completed)
     {

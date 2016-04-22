@@ -231,9 +231,12 @@ bool Simulator::parseMetaData()
         if( lineBuffer == BEGIN_PROGRAM_STRING )
         {
             program.clear_operations();
+            hardwareCycleTime = 0;
+            program.add_operation( lineBuffer, 0 );
         }
         else if( lineBuffer == END_PROGRAM_STRING )
         {
+            program.add_operation( lineBuffer, 0 );
             programs_.push_back( program );
             programs_.back().prepare();
         }
@@ -273,6 +276,7 @@ bool Simulator::parseMetaData()
 
             program.add_operation( lineBuffer, hardwareCycleTime );
         }
+
     }
 
     // Close the file
@@ -319,45 +323,39 @@ void Simulator::run()
     display( "Simulator program ending" );
 }
 
-void Simulator::handleIO( const Operation& operation )
+void Simulator::handleIO( const Operation& operation, int pid )
 {
-    string type;
+    string startMsg = "I/O: process " + to_string(pid) + " starting ";
+    string endMsg = "Interrupt: process " + to_string(pid) + " done with ";
 
-    // Handle specific types of IO
     if( operation.parameters().description == "hard drive" )
     {
-        if( operation.parameters().id == 'I' )
-        {
-            type = "input";
-        }
-        else if( operation.parameters().id == 'O' )
-        {
-            type = "output";
-        }
+        string type = operation.parameters().id == 'I' ? "input" : "output";
 
-        // display output
-        display( processText + "start hard drive " + type );
+        display( startMsg + "hard drive " + type );
         wait( operation.parameters().duration );
-        display( processText + "end hard drive " + type );
+        display( startMsg + "hard drive " + type );
     }
     else if( operation.parameters().description == "keyboard" )
     {
-        display( processText + "start keyboard input" );
+        display( startMsg + "keyboard input" );
         wait( operation.parameters().duration );
-        display( processText + "end keyboard input" );
+        display( endMsg + "keyboard input" );
     }
     else if( operation.parameters().description == "printer" )
     {
-        display( processText + "start printer output" );
+        display( startMsg + "printer output" );
         wait( operation.parameters().duration );
-        display( processText + "end printer output" );
+        display( endMsg + "printer output" );
     }
     else if( operation.parameters().description == "monitor" )
     {
-        display( processText + "start monitor output" );
+        display( startMsg + "monitor output" );
         wait( operation.parameters().duration );
-        display( processText + "end monitor output" );
+        display( endMsg + "monitor output" );
     }
+
+    interrupts_.push(pid);
 }
 
 void Simulator::handleOperation( const Operation& operation )
@@ -478,12 +476,88 @@ void Simulator::displayRemoveProcessText()
     display( "OS: removing process " + to_string( processCount_ ) );
 }
 
-void Simulator::executeFIFOP()
+Program Simulator::next(FIFO_Q* readyQueue)
 {
+    Program nextProgram = readyQueue->top();
+    readyQueue->pop();
+    return nextProgram;
+}
+
+Program Simulator::next(RR_Q* readyQueue)
+{
+    Program nextProgram = readyQueue->front();
+    readyQueue->pop();
+    return nextProgram;
 }
 
 void Simulator::executeRR()
 {
+    int programCounter = 0;
+
+    // Create a ready queue
+    std::unique_ptr<FIFO_Q> readyQueue(new FIFO_Q);
+    for( Program program : programs_ )
+    {
+        program.prepare();
+        readyQueue->push( program );
+    }
+
+    // Execute the programs according to RR scheduling
+    while( !readyQueue->empty() || !suspendedPrograms_.empty() )
+    {
+        // Process interrupts
+        while( !interrupts_.empty() )
+        {
+            int interrupt = interrupts_.front();
+            interrupts_.pop();
+
+            if( interrupt != 0 )
+            {
+                Program suspendedProgram = suspendedPrograms_.at( interrupt );
+                suspendedPrograms_.erase( interrupt );
+
+                suspendedProgram.prepare();
+                readyQueue->push( suspendedProgram );
+            }
+        }
+
+        // Execute programs in ready queue
+        if( !readyQueue->empty() )
+        {
+            display( "OS: selecting next process" );
+            Program program = next(readyQueue.get());
+
+            // Execute the program until it is interupted
+
+        }
+    }
 }
 
+void Simulator::executeProgram( Program *program )
+{
+    int pid = program->process_control_block().processID;
+    program->run();
+    Operation operation = program->step();
+
+    // Create thread lambda
+    auto ThreadStart = [this, operation, pid]()
+    {
+        handleIO(operation, pid);
+    };
+
+    if(operation.parameters().id == 'A' &&
+       operation.parameters().description == "start")
+    {
+        display("OS: starting process " + to_string(pid));
+        operation = program->step();
+    }
+
+    if(operation.parameters().id == 'I' ||
+       operation.parameters().id == 'O')
+    {
+        display("Process: " + to_string(pid) + ": starting I/O");
+        thread IO_thread(ThreadStart);
+        IO_thread.detach(); // async, do not block
+    }
+}
 

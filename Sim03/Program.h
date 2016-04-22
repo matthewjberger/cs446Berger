@@ -43,7 +43,7 @@ class Program
 
         std::list<Operation> operations();
 
-        void step(); // Steps current operation
+        Operation step(); // Steps current operation, returns info about the operation
 
         bool operator>(const Program &other) const;
 
