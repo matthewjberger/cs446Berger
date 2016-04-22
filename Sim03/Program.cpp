@@ -120,7 +120,7 @@ void Program::step()
     currentOperation_->step();
 }
 
-PCB Program::process_control_block()
+PCB Program::process_control_block() const
 {
     return processControlBlock;
 }

@@ -110,6 +110,19 @@ class Simulator
 
         int processCount_;
         std::string processText;
+
+        struct FIFOComparator
+        {
+            bool operator()( const Program &one, const Program &other )
+            {
+                int firstTime = one.process_control_block().remainingTime;
+                int secondTime = other.process_control_block().remainingTime;
+                return firstTime > secondTime;
+            }
+        };
+
+        using FIFO_Q = std::priority_queue<Program, std::vector<Program>, FIFOComparator>;
+        using RR_Q = std::queue<Program>;
 };
 
 #endif

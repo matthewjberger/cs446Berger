@@ -34,7 +34,7 @@ class Program
 
         // Status
         int operations_left() const;
-        PCB process_control_block();
+        PCB process_control_block() const;
 
         void add_operation( const std::string &operationString,
                            int hardwareCycleTime );

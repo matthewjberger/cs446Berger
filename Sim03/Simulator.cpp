@@ -427,6 +427,8 @@ bool Simulator::setSchedulingCode( const string &schedulingCode )
     const string ERROR_MESSAGE =
         "Invalid scheduling code specified. Could not set scheduling code";
 
+    display( "OS: preparing all processes" );
+
     if( schedulingCode == "FIFO-P")
     {
         configurationData.schedulingCode = FIFO_P;
