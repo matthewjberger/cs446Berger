@@ -28,7 +28,7 @@ Simulator::~Simulator()
 {
     // Write to the log if required
     if( configurationData.loggingMode == LOG_TO_BOTH ||
-        configurationData.loggingMode == LOG_TO_FILE )
+            configurationData.loggingMode == LOG_TO_FILE )
     {
         ofstream logFile_( configurationData.logFilePath );
 
@@ -49,10 +49,10 @@ void Simulator::display( const string &output )
     const auto timePassed = secondsPassed().count();
 
     if( configurationData.loggingMode == LOG_TO_BOTH ||
-        configurationData.loggingMode == LOG_TO_MONITOR )
+            configurationData.loggingMode == LOG_TO_MONITOR )
     {
         cout << setw( LEADING_PRECISION ) << setfill( '0' )
-             << fixed << timePassed << " - " << output << endl;
+            << fixed << timePassed << " - " << output << endl;
 
     }
 
@@ -264,7 +264,7 @@ bool Simulator::parseMetaData()
             else
             {
                 cerr << "Error! Invalid Meta-Data file. "
-                     << "Could not set operation hardware cycle!" << endl;
+                    << "Could not set operation hardware cycle!" << endl;
 
                 if(inFile.is_open())
                 {
@@ -300,27 +300,27 @@ void Simulator::run()
     switch( configurationData.schedulingCode )
     {
         case FIFO_P:
-        {
-            executeScheduling<FIFO_Q>();
-            break;
-        }
+            {
+                executeScheduling<FIFO_Q>();
+                break;
+            }
 
         case RR:
-        {
-            executeScheduling<RR_Q>();
-            break;
-        }
+            {
+                executeScheduling<RR_Q>();
+                break;
+            }
 
         case SRTF_P:
-        {
-            executeScheduling<SRTF_Q>();
-            break;
-        }
+            {
+                executeScheduling<SRTF_Q>();
+                break;
+            }
 
         default:
-        {
-            cerr << ERROR_MESSAGE << endl;
-        }
+            {
+                cerr << ERROR_MESSAGE << endl;
+            }
     }
 
     // End the simulation
@@ -460,7 +460,7 @@ Program Simulator::next(SRTF_Q* readyQueue)
 }
 
 
-template<typename Queue>
+    template<typename Queue>
 void Simulator::executeScheduling()
 {
     int counter = 0;
@@ -537,7 +537,7 @@ void Simulator::executeProgram( Program *program )
 
     // Start
     if( operationType == 'A' &&
-        operation->parameters().description == "start")
+            operation->parameters().description == "start")
     {
         display("OS: starting process " + to_string(pid));
         operation = program->step();
@@ -582,7 +582,7 @@ void Simulator::executeProgram( Program *program )
 
     // The last operation in a program is an exit operation
     if( program->operations_left() <= 1 &&
-        program->process_control_block().state != SUSPENDED)
+            program->process_control_block().state != SUSPENDED)
     {
         program->exit();
         display("OS: removing process " + to_string(pid));

@@ -36,7 +36,7 @@ class Simulator
 
     private:
 
-       enum LoggingMode
+        enum LoggingMode
         {
             LOG_TO_MONITOR,
             LOG_TO_FILE,
@@ -70,6 +70,43 @@ class Simulator
         } configurationData;
 
         /***** Member Functions *****/
+        // Handles IO with a unique thread
+        void handleIO( const Operation& operation, int pid );
+
+        // Outputs to monitor, log, or both depending on current loggingMode
+        void display( const std::string &output );
+
+        // Makes the current thread sleep for an amount of time using chrono
+        void wait( int milliseconds ) const;
+
+        // Returns the amount of time that has passed
+        std::chrono::duration<double> secondsPassed();
+
+        // A queue for SRTFN scheduling
+        std::queue<Program> programsSRTFN_;
+
+        // Scheduling Handlers
+        // Priority queue for FIFO-P, Regular queue for RR
+        template<typename Queue>
+            void executeScheduling();
+
+        bool parseMetaData();
+        bool parseConfigurationFile(const std::string &configFile );
+        bool setLoggingMode( const std::string &loggingMode );
+        bool setSchedulingCode( const std::string &schedulingCode );
+        bool checkVersion() const;
+        void displayErrorMessage(const std::string &message) const;
+        void executeProgram( Program* program );
+
+        std::vector<Program> programs_;
+        std::stringstream logStream_;
+
+        std::chrono::time_point<std::chrono::high_resolution_clock>
+            initialTime_, currentTime_;
+
+        int processCount_;
+        std::string processText;
+
         struct SRTFComparison
         {
             bool operator()( const Program &one, const Program &other )
@@ -90,45 +127,6 @@ class Simulator
             }
         };
 
-        // Handles IO with a unique thread
-        void handleIO( const Operation& operation, int pid );
-
-        // Outputs to monitor, log, or both depending on current loggingMode
-        void display( const std::string &output );
-
-        // Makes the current thread sleep for an amount of time using chrono
-        void wait( int milliseconds ) const;
-
-        // Returns the amount of time that has passed
-        std::chrono::duration<double> secondsPassed();
-
-        // A queue for SRTFN scheduling
-        std::queue<Program> programsSRTFN_;
-
-        // Scheduling Handlers
-        // Priority queue for FIFO-P, Regular queue for RR
-        template<typename Queue>
-        void executeScheduling();
-
-        bool parseMetaData();
-        bool parseConfigurationFile(const std::string &configFile );
-        bool setLoggingMode( const std::string &loggingMode );
-        bool setSchedulingCode( const std::string &schedulingCode );
-        bool checkVersion() const;
-        void displayErrorMessage(const std::string &message) const;
-        void displayRemoveProcessText();
-        void displayLoadProcessText();
-        void executeProgram( Program* program );
-
-        std::vector<Program> programs_;
-        std::stringstream logStream_;
-
-        std::chrono::time_point<std::chrono::high_resolution_clock>
-            initialTime_, currentTime_;
-
-        int processCount_;
-        std::string processText;
-
         using RR_Q = std::queue<Program>;
         using FIFO_Q =
             std::priority_queue<Program, std::vector<Program>, FIFOComparison>;
@@ -143,6 +141,6 @@ class Simulator
         Program next(FIFO_Q* readyQueue);
         Program next(SRTF_Q* readyQueue);
 
-       };
+};
 
 #endif
