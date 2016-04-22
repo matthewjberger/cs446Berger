@@ -11,6 +11,13 @@ enum States
     NEW, READY, RUNNING, WAITING, EXIT
 };
 
+struct PCB
+{
+    int state;
+    int processID;
+    int remainingTime;
+    bool completed;
+};
 
 class Program
 {
@@ -26,11 +33,8 @@ class Program
         void exit();
 
         // Status
-        bool completed();
-        int operations_left();
-        int time_left();
-        int processID() const;
-        int duration() const;
+        int operations_left() const;
+        PCB process_control_block();
 
         void add_operation( const std::string &operationString,
                            int hardwareCycleTime );
@@ -44,14 +48,9 @@ class Program
     private:
 
         std::list<Operation> operations_;
+        std::list<Operation>::iterator currentOperation_;
 
-        struct
-        {
-            int state;
-            int processID;
-            int remainingTime;
-            bool completed;
-        } processControlBlock;
+        PCB processControlBlock;
 };
 
 #endif

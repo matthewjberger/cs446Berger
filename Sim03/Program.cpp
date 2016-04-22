@@ -6,6 +6,9 @@ Program::Program()
     processControlBlock.state      = NEW;
     processControlBlock.processID  = 0;
     processControlBlock.remainingTime  = 0;
+    processControlBlock.completed = false;
+
+    currentOperation_ = operations_.begin();
 }
 
 Program::~Program()
@@ -48,11 +51,6 @@ void Program::add_operation( const std::string &operationString,
         += operations_.front().parameters().duration;
 }
 
-int Program::processID() const
-{
-    return processControlBlock.processID;
-}
-
 std::list<Operation> Program::operations()
 {
     return operations_;
@@ -73,18 +71,11 @@ void Program::prepare()
     processControlBlock.state = READY;
 }
 
-int Program::duration() const
-{
-    return processControlBlock.remainingTime;
-}
-
-Operation Program::next_operation()
-{
-}
-
 bool Program::operator>(const Program &other) const
 {
-    return (duration() > other.duration());
+    int firstTime = processControlBlock.remainingTime;
+    int otherTime = other.processControlBlock.remainingTime;
+    return (firstTime > otherTime);
 }
 
 void Program::suspend()
@@ -92,22 +83,36 @@ void Program::suspend()
     processControlBlock.state = WAITING;
 }
 
-bool Program::completed()
-{
-    return operations_.empty();
-}
-
-int Program::operations_left()
+int Program::operations_left() const
 {
     return operations_.size();
 }
 
-int Program::time_left()
-{
-    return processControlBlock.remainingTime;
-}
-
 void Program::step()
 {
+    if(processControlBlock.completed)
+    {
+        return;
+    }
+
+    if(!currentOperation_->completed())
+    {
+        if(currentOperation_ != operations_.end())
+        {
+            currentOperation_++; // next operation in the list
+        }
+        else
+        {
+            processControlBlock.completed = true;
+            return;
+        }
+    }
+
+    currentOperation_->step();
+}
+
+PCB Program::process_control_block()
+{
+    return processControlBlock;
 }
 
