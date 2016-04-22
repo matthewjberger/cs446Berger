@@ -3,27 +3,41 @@
 
 #include <string>
 
+struct OperationParameters
+{
+    // S, A, P, I, O
+    char id_;
+
+    // start, end, run, hard drive, keyboard, printer, monitor
+    std::string description_;
+
+    // How long the operation needs to complete
+    int duration_;
+
+    // Number of remaining cycles
+    int cyclesLeft_;
+
+    // Cycle duration
+    int cycleTime_;
+};
+
 class Operation
 {
     public:
 
         Operation( const char id,
                    const std::string &description,
-                   const int duration  );
+                   const int duration,
+                   const int cycles );
 
-        char id() const;
-        std::string description() const;
-        int duration() const;
+        bool completed() const;
+        void step();
+
+        OperationParameters parameters();
 
     private:
 
-        // S, A, P, I, O
-        char id_;
+        OperationParameters parameters_;
 
-        // start, end, run, hard drive, keyboard, printer, monitor
-        std::string description_;
-
-        // The amount of time the operation takes to complete
-        int duration_;
 };
 #endif

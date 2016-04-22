@@ -2,27 +2,30 @@
 
 Operation::Operation( const char id,
                       const std::string &description,
-                      const int duration )
+                      const int duration,
+                      const int cycles )
 {
-    id_          = id;
-    description_ = description;
-    duration_    = duration;
+    parameters_.id_          = id;
+    parameters_.description_ = description;
+    parameters_.duration_    = duration;
+    parameters_.cyclesLeft_  = cycles;
 
 }
 
-char Operation::id() const
+bool Operation::completed() const
 {
-    return id_;
+    return (parameters_.cyclesLeft_ == 0);
 }
 
-int Operation::duration() const
+void Operation::step()
 {
-    return duration_;
+    parameters_.duration_ -= parameters_.cycleTime_;
+    parameters_.cyclesLeft_--;
 }
 
-std::string Operation::description() const
+OperationParameters Operation::parameters()
 {
-    return description_;
+    return parameters_;
 }
 
 
