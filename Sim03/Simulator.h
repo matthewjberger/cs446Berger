@@ -44,9 +44,8 @@ class Simulator
 
         enum SchedulingCode
         {
-            FCFS   = 0,
-            SJF    = 1,
-            SRTF_N = 2
+            FIFO_P,
+            RR
         };
 
         struct
@@ -59,6 +58,8 @@ class Simulator
             int hardDriveCycleTime;
             int printerCycleTime;
             int keyboardCycleTime;
+
+            int quantumCycleTime;
 
             LoggingMode loggingMode;
             std::string logFilePath;
@@ -87,9 +88,8 @@ class Simulator
         std::queue<Program> programsSRTFN_;
 
         // Scheduling Handlers
-        void executeFCFS();
-        void executeSJF();
-        void executeSRTFN();
+        void executeFIFOP();
+        void executeRR();
 
         bool parseMetaData();
         bool parseConfigurationFile(const std::string &configFile );

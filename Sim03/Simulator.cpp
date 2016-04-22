@@ -144,6 +144,7 @@ bool Simulator::parseConfigurationFile( const std::string &configFile )
     setSchedulingCode( GetNextToken() );
 
     // Cycle times
+    configurationData.quantumCycleTime   = stoi( GetNextToken() );
     configurationData.processorCycleTime = stoi( GetNextToken() );
     configurationData.monitorDisplayTime = stoi( GetNextToken() );
     configurationData.hardDriveCycleTime = stoi( GetNextToken() );
@@ -280,21 +281,15 @@ void Simulator::run()
     // Execute all operations in the queue
     switch( configurationData.schedulingCode )
     {
-        case FCFS:
+        case FIFO_P:
         {
-            executeFCFS();
+            executeFIFOP();
             break;
         }
 
-        case SJF:
+        case RR:
         {
-            executeSJF();
-            break;
-        }
-
-        case SRTF_N:
-        {
-            //executeSRTFN();
+            executeRR();
             break;
         }
 
@@ -416,17 +411,13 @@ bool Simulator::setSchedulingCode( const string &schedulingCode )
     const string ERROR_MESSAGE =
         "Invalid scheduling code specified. Could not set scheduling code";
 
-    if( schedulingCode == "FCFS" || schedulingCode == "FIFO" )
+    if( schedulingCode == "FIFO-P")
     {
-        configurationData.schedulingCode = FCFS;
+        configurationData.schedulingCode = FIFO_P;
     }
-    else if( schedulingCode == "SJF" )
+    else if( schedulingCode == "RR" )
     {
-        configurationData.schedulingCode = SJF;
-    }
-    else if( schedulingCode == "SRTF_N" )
-    {
-        configurationData.schedulingCode = SRTF_N;
+        configurationData.schedulingCode = RR;
     }
     else
     {
@@ -456,7 +447,7 @@ void Simulator::displayErrorMessage( const string &message ) const
     cerr << "Error: " << message << endl;
 }
 
-void Simulator::executeFCFS()
+void Simulator::executeFIFOP()
 {
     while(!programs_.empty())
     {
@@ -473,7 +464,7 @@ void Simulator::executeFCFS()
     }
 }
 
-void Simulator::executeSJF()
+void Simulator::executeRR()
 {
     // Same as FCFS except the programs are
     // sorted by their duration in the PCB
@@ -489,12 +480,6 @@ void Simulator::executeSJF()
     programs_.sort( SortByDuration );
 
     // Execute in order
-    executeFCFS();
-}
-
-void Simulator::executeSRTFN()
-{
-    // Not implemented
 }
 
 void Simulator::displayLoadProcessText()

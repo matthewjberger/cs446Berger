@@ -105,9 +105,9 @@ Operation::Operation( const char id,
                       const std::string &description,
                       const int duration )
 {
-    this->id_          = id;
-    this->description_ = description;
-    this->duration_    = duration;
+    id_          = id;
+    description_ = description;
+    duration_    = duration;
 
 }
 
