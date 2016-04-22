@@ -561,3 +561,6 @@ void Simulator::executeProgram( Program *program )
     }
 }
 
+void Simulator::executeFIFOP()
+{
+}
