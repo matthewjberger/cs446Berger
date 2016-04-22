@@ -311,6 +311,12 @@ void Simulator::run()
             break;
         }
 
+        case SRTF_P:
+        {
+            executeScheduling<SRTF_Q>();
+            break;
+        }
+
         default:
         {
             cerr << ERROR_MESSAGE << endl;
@@ -397,6 +403,10 @@ bool Simulator::setSchedulingCode( const string &schedulingCode )
     {
         configurationData.schedulingCode = RR;
     }
+    else if( schedulingCode == "SRTF-P" )
+    {
+        configurationData.schedulingCode = SRTF_P;
+    }
     else
     {
         displayErrorMessage( ERROR_MESSAGE );
@@ -438,6 +448,17 @@ Program Simulator::next(RR_Q* readyQueue)
     readyQueue->pop();
     return nextProgram;
 }
+
+// This is necessary
+// because there is a different comparison operation for this priority queue
+// even though the operation for the function is this same as next(FIFO_Q)
+Program Simulator::next(SRTF_Q* readyQueue)
+{
+    Program nextProgram = readyQueue->top();
+    readyQueue->pop();
+    return nextProgram;
+}
+
 
 template<typename Queue>
 void Simulator::executeScheduling()

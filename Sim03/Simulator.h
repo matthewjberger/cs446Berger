@@ -46,7 +46,8 @@ class Simulator
         enum SchedulingCode
         {
             FIFO_P,
-            RR
+            RR,
+            SRTF_P
         };
 
         struct
@@ -69,6 +70,25 @@ class Simulator
         } configurationData;
 
         /***** Member Functions *****/
+        struct SRTFComparison
+        {
+            bool operator()( const Program &one, const Program &other )
+            {
+                int firstTime = one.process_control_block().remainingTime;
+                int secondTime = other.process_control_block().remainingTime;
+                return firstTime > secondTime;
+            }
+        };
+
+        struct FIFOComparison
+        {
+            bool operator()( const Program &one, const Program &other )
+            {
+                int firstID = one.process_control_block().processID;
+                int secondID = other.process_control_block().processID;
+                return firstID > secondID;
+            }
+        };
 
         // Handles IO with a unique thread
         void handleIO( const Operation& operation, int pid );
@@ -109,19 +129,11 @@ class Simulator
         int processCount_;
         std::string processText;
 
-        struct FIFOComparator
-        {
-            bool operator()( const Program &one, const Program &other )
-            {
-                int firstTime = one.process_control_block().remainingTime;
-                int secondTime = other.process_control_block().remainingTime;
-                return firstTime > secondTime;
-            }
-        };
-
         using RR_Q = std::queue<Program>;
         using FIFO_Q =
-            std::priority_queue<Program, std::vector<Program>, FIFOComparator>;
+            std::priority_queue<Program, std::vector<Program>, FIFOComparison>;
+        using SRTF_Q =
+            std::priority_queue<Program, std::vector<Program>, SRTFComparison>;
 
         std::queue<int> interrupts_;
 
@@ -129,6 +141,7 @@ class Simulator
 
         Program next(RR_Q* readyQueue);
         Program next(FIFO_Q* readyQueue);
+        Program next(SRTF_Q* readyQueue);
 
        };
 
