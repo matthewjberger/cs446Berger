@@ -22,33 +22,49 @@ Simulator::Simulator( const string &configFile )
 
     // Set how precise the times should be when displayed
     cout.precision( TRAILING_PRECISION );
-
-    // Open the log file if necessary
-    if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
-    {
-        logFile_.open( configurationData.logFilePath );
-    }
 }
 
 Simulator::~Simulator()
 {
+    // Write to the log if required
+    if( configurationData.loggingMode == LOG_TO_BOTH ||
+        configurationData.loggingMode == LOG_TO_FILE )
+    {
+        ofstream logFile_( configurationData.logFilePath );
+
+        if(logFile_.good())
+        {
+            logFile_ << logStream_.str();
+        }
+
+        if(logFile_.is_open())
+        {
+            logFile_.close();
+        }
+    }
+
 }
 
 void Simulator::display( const string &output )
 {
     const auto timePassed = secondsPassed().count();
 
-    if( configurationData.loggingMode |  LOG_TO_BOTH | LOG_TO_MONITOR )
+    if( configurationData.loggingMode == LOG_TO_BOTH ||
+        configurationData.loggingMode == LOG_TO_MONITOR )
     {
         cout << setw( LEADING_PRECISION ) << setfill( '0' )
              << fixed << timePassed << " - " << output << endl;
+
+        // If logging, write to a string stream and then log to file
+        // at the end of the program
+        if( configurationData.loggingMode == LOG_TO_BOTH ||
+            configurationData.loggingMode == LOG_TO_FILE )
+        {
+            logStream_ << setw( LEADING_PRECISION ) << setfill( '0' )
+                << fixed << timePassed << " - " << output << endl;
+        }
     }
 
-    if( configurationData.loggingMode | LOG_TO_BOTH | LOG_TO_FILE )
-    {
-        logFile_ << setw( LEADING_PRECISION ) << setfill( '0' )
-                 << fixed << timePassed << " - " << output << endl;
-    }
 }
 
 chrono::duration<double> Simulator::secondsPassed()
@@ -214,7 +230,7 @@ bool Simulator::parseMetaData()
 
         if( lineBuffer == BEGIN_PROGRAM_STRING )
         {
-            program.clearOperations();
+            program.clear_operations();
         }
         else if( lineBuffer == END_PROGRAM_STRING )
         {
@@ -308,51 +324,51 @@ void Simulator::handleIO( const Operation& operation )
     string type;
 
     // Handle specific types of IO
-    if( operation.description() == "hard drive" )
+    if( operation.parameters().description == "hard drive" )
     {
-        if( operation.id() == 'I' )
+        if( operation.parameters().id == 'I' )
         {
             type = "input";
         }
-        else if( operation.id() == 'O' )
+        else if( operation.parameters().id == 'O' )
         {
             type = "output";
         }
 
         // display output
         display( processText + "start hard drive " + type );
-        wait( operation.duration() );
+        wait( operation.parameters().duration );
         display( processText + "end hard drive " + type );
     }
-    else if( operation.description() == "keyboard" )
+    else if( operation.parameters().description == "keyboard" )
     {
         display( processText + "start keyboard input" );
-        wait( operation.duration() );
+        wait( operation.parameters().duration );
         display( processText + "end keyboard input" );
     }
-    else if( operation.description() == "printer" )
+    else if( operation.parameters().description == "printer" )
     {
         display( processText + "start printer output" );
-        wait( operation.duration() );
+        wait( operation.parameters().duration );
         display( processText + "end printer output" );
     }
-    else if( operation.description() == "monitor" )
+    else if( operation.parameters().description == "monitor" )
     {
         display( processText + "start monitor output" );
-        wait( operation.duration() );
+        wait( operation.parameters().duration );
         display( processText + "end monitor output" );
     }
 }
 
 void Simulator::handleOperation( const Operation& operation )
 {
-    switch( operation.id() )
+    switch( operation.parameters().id )
     {
         // Processing
         case 'P':
         {
             display( processText + "start processing action" );
-            wait( operation.duration() );
+            wait( operation.parameters().duration );
             display( processText + "end processing action" );
             break;
         }
@@ -447,14 +463,6 @@ void Simulator::displayErrorMessage( const string &message ) const
     cerr << "Error: " << message << endl;
 }
 
-void Simulator::executeFIFOP()
-{
-}
-
-void Simulator::executeRR()
-{
-}
-
 void Simulator::displayLoadProcessText()
 {
     processCount_++;
@@ -467,3 +475,13 @@ void Simulator::displayRemoveProcessText()
 {
     display( "OS: removing process " + to_string( processCount_ ) );
 }
+
+void Simulator::executeFIFOP()
+{
+}
+
+void Simulator::executeRR()
+{
+}
+
+

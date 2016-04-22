@@ -39,6 +39,8 @@ class Program
         void add_operation( const std::string &operationString,
                            int hardwareCycleTime );
 
+        void clear_operations();
+
         std::list<Operation> operations();
 
         void step(); // Steps current operation

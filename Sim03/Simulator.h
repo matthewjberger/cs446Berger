@@ -37,9 +37,9 @@ class Simulator
 
        enum LoggingMode
         {
-            LOG_TO_MONITOR = 0x01,
-            LOG_TO_FILE    = 0x02,
-            LOG_TO_BOTH    = 0x04
+            LOG_TO_MONITOR,
+            LOG_TO_FILE,
+            LOG_TO_BOTH
         };
 
         enum SchedulingCode
@@ -103,7 +103,7 @@ class Simulator
         /***** Member Variables *****/
         std::list<Program> programs_;
 
-        std::ofstream logFile_;
+        std::stringstream logStream_;
 
         std::chrono::time_point<std::chrono::high_resolution_clock>
             initialTime_, currentTime_;

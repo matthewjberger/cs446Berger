@@ -30,7 +30,7 @@ class Operation
         bool completed() const;
         void step();
 
-        OperationParameters parameters();
+        OperationParameters parameters() const;
 
     private:
 

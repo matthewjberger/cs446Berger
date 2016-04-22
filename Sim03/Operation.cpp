@@ -16,7 +16,7 @@ void Operation::step()
     parameters_.cyclesLeft--;
 }
 
-OperationParameters Operation::parameters()
+OperationParameters Operation::parameters() const
 {
     return parameters_;
 }

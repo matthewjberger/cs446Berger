@@ -51,6 +51,15 @@ void Program::add_operation( const std::string &operationString,
         += operations_.front().parameters().duration;
 }
 
+void Program::clear_operations()
+{
+    if(!operations_.empty())
+    {
+        operations_.clear();
+        currentOperation_ = operations_.begin();
+    }
+}
+
 std::list<Operation> Program::operations()
 {
     return operations_;
