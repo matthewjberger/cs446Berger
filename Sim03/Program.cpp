@@ -98,10 +98,10 @@ int Program::operations_left() const
     return operations_.size() - currentOperation_;
 }
 
-Operation Program::step()
+Operation* Program::step()
 {
-    Operation operation = operations_[currentOperation_];
-    if(operation.completed())
+    Operation* operation = &operations_[currentOperation_];
+    if(operation->completed())
     {
         if(currentOperation_ < operations_.size() - 1)
         {
@@ -113,7 +113,7 @@ Operation Program::step()
         }
     }
 
-    operation.step();
+    operation->step();
     return operation;
 }
 

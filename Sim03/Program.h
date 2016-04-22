@@ -46,7 +46,7 @@ class Program
         std::vector<Operation> operations();
 
         // Steps current operation, returns info about the operation
-        Operation step();
+        Operation* step();
 
         bool operator>(const Program &other) const;
 

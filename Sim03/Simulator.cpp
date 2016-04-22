@@ -503,20 +503,20 @@ void Simulator::executeScheduling()
 void Simulator::executeProgram( Program *program )
 {
     int pid = program->process_control_block().processID;
-    Operation operation = program->step();
-    char operationType = operation.parameters().id;
+    Operation* operation = program->step();
+    char operationType = operation->parameters().id;
 
     // Create thread lambda
     auto ThreadStart = [this, operation, pid]()
     {
-        handleIO(operation, pid);
+        handleIO(*operation, pid);
     };
 
     program->run();
 
     // Start
     if( operationType == 'A' &&
-        operation.parameters().description == "start")
+        operation->parameters().description == "start")
     {
         display("OS: starting process " + to_string(pid));
         operation = program->step();
@@ -538,12 +538,12 @@ void Simulator::executeProgram( Program *program )
     {
         display("Process " + to_string(pid) + ": processing action");
         int quantum = 0;
-        while( !operation.completed() && interrupts_.empty() )
+        while( !operation->completed() && interrupts_.empty() )
         {
             quantum++;
 
             operation = program->step();
-            wait( operation.parameters().cycleTime );
+            wait( operation->parameters().cycleTime );
 
             if( quantum == configurationData.quantum )
             {
@@ -553,7 +553,7 @@ void Simulator::executeProgram( Program *program )
             }
         }
 
-        if( operation.completed() )
+        if( operation->completed() )
         {
             display("Process " + to_string(pid) + ": end processing action");
         }
