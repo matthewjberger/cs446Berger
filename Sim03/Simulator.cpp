@@ -255,7 +255,7 @@ bool Simulator::parseMetaData()
                 return false;
             }
 
-            program.addOperation( lineBuffer, hardwareCycleTime );
+            program.add_operation( lineBuffer, hardwareCycleTime );
         }
     }
 

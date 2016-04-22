@@ -1,15 +1,8 @@
 #include "Operation.h"
 
-Operation::Operation( const char id,
-                      const std::string &description,
-                      const int duration,
-                      const int cycles )
+Operation::Operation( const OperationParameters& parameters )
 {
-    parameters_.id_          = id;
-    parameters_.description_ = description;
-    parameters_.duration_    = duration;
-    parameters_.cyclesLeft_  = cycles;
-
+    parameters_ = parameters;
 }
 
 bool Operation::completed() const
@@ -27,5 +20,3 @@ OperationParameters Operation::parameters()
 {
     return parameters_;
 }
-
-

@@ -25,10 +25,7 @@ class Operation
 {
     public:
 
-        Operation( const char id,
-                   const std::string &description,
-                   const int duration,
-                   const int cycles );
+        Operation( const OperationParameters& parameters );
 
         bool completed() const;
         void step();

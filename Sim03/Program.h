@@ -24,7 +24,7 @@ class Program
         void run();
         void suspend();
         void exit();
-        void addOperation( const std::string &operationString,
+        void add_operation( const std::string &operationString,
                            int hardwareCycleTime );
         void clearOperations();
         int processID() const;

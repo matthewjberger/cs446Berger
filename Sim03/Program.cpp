@@ -16,7 +16,7 @@ Program::~Program()
     clearOperations();
 }
 
-void Program::addOperation( const std::string &operationString,
+void Program::add_operation( const std::string &operationString,
                             int hardwareCycleTime )
 {
     // Operation format is "S(start)0"
