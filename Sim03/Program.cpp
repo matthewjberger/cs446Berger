@@ -1,19 +1,15 @@
 #include "Program.h"
 using namespace std;
 
-/****** Program ******/
 Program::Program()
 {
     processControlBlock.state      = NEW;
     processControlBlock.processID  = 0;
     processControlBlock.remainingTime  = 0;
-
-    currentOperation = operations_.begin();
 }
 
 Program::~Program()
 {
-    clearOperations();
 }
 
 void Program::add_operation( const std::string &operationString,
@@ -37,25 +33,24 @@ void Program::add_operation( const std::string &operationString,
     int duration = ( cycles * hardwareCycleTime );
 
     // Add the operation
-    Operation operation( id, description, duration );
+    OperationParameters operationParameters;
+    operationParameters.id = id;
+    operationParameters.description = description;
+    operationParameters.duration = duration;
+    operationParameters.cycleTime = hardwareCycleTime;
+    operationParameters.cyclesLeft = cycles;
+
+    Operation operation( operationParameters );
     operations_.push_back( operation );
 
     // Update the program duration
-    processControlBlock.remainingTime += operations_.front().duration();
+    processControlBlock.remainingTime
+        += operations_.front().parameters().duration;
 }
 
 int Program::processID() const
 {
     return processControlBlock.processID;
-}
-
-void Program::clearOperations()
-{
-    if( !operations_.empty() )
-    {
-        operations_.clear();
-        currentOperation = operations_.begin();
-    }
 }
 
 std::list<Operation> Program::operations()
@@ -83,16 +78,8 @@ int Program::duration() const
     return processControlBlock.remainingTime;
 }
 
-Operation Program::nextOperation()
+Operation Program::next_operation()
 {
-    processControlBlock.remainingTime -= currentOperation->duration();
-
-    if(currentOperation != operations_.end())
-    {
-        currentOperation++;
-    }
-
-    return *currentOperation;
 }
 
 bool Program::operator>(const Program &other) const
@@ -103,5 +90,24 @@ bool Program::operator>(const Program &other) const
 void Program::suspend()
 {
     processControlBlock.state = WAITING;
+}
+
+bool Program::completed()
+{
+    return operations_.empty();
+}
+
+int Program::operations_left()
+{
+    return operations_.size();
+}
+
+int Program::time_left()
+{
+    return processControlBlock.remainingTime;
+}
+
+void Program::step()
+{
 }
 

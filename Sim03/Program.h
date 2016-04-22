@@ -1,10 +1,9 @@
 #ifndef PROGRAM_H_
 #define PROGRAM_H_
 
-#include <queue>
+#include <list>
 #include <string>
 #include <memory>
-#include <list>
 #include "Operation.h"
 
 enum States
@@ -20,24 +19,29 @@ class Program
         Program();
         ~Program();
 
+        // State Manipulation
         void prepare();
         void run();
         void suspend();
         void exit();
-        void add_operation( const std::string &operationString,
-                           int hardwareCycleTime );
-        void clearOperations();
+
+        // Status
+        bool completed();
+        int operations_left();
+        int time_left();
         int processID() const;
         int duration() const;
+
+        void add_operation( const std::string &operationString,
+                           int hardwareCycleTime );
+
         std::list<Operation> operations();
 
-        Operation nextOperation();
+        void step(); // Steps current operation
 
         bool operator>(const Program &other) const;
 
     private:
-
-        std::list<Operation>::const_iterator currentOperation;
 
         std::list<Operation> operations_;
 
@@ -46,6 +50,7 @@ class Program
             int state;
             int processID;
             int remainingTime;
+            bool completed;
         } processControlBlock;
 };
 

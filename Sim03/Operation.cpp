@@ -7,13 +7,13 @@ Operation::Operation( const OperationParameters& parameters )
 
 bool Operation::completed() const
 {
-    return (parameters_.cyclesLeft_ == 0);
+    return (parameters_.cyclesLeft == 0);
 }
 
 void Operation::step()
 {
-    parameters_.duration_ -= parameters_.cycleTime_;
-    parameters_.cyclesLeft_--;
+    parameters_.duration -= parameters_.cycleTime;
+    parameters_.cyclesLeft--;
 }
 
 OperationParameters Operation::parameters()

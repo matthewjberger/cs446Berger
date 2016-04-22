@@ -6,19 +6,19 @@
 struct OperationParameters
 {
     // S, A, P, I, O
-    char id_;
+    char id;
 
     // start, end, run, hard drive, keyboard, printer, monitor
-    std::string description_;
+    std::string description;
 
     // How long the operation needs to complete
-    int duration_;
+    int duration;
 
     // Number of remaining cycles
-    int cyclesLeft_;
+    int cyclesLeft;
 
     // Cycle duration
-    int cycleTime_;
+    int cycleTime;
 };
 
 class Operation
