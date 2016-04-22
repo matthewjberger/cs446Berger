@@ -103,7 +103,6 @@ Operation Program::step()
     Operation operation = operations_[currentOperation_];
     if(operation.completed())
     {
-        printf("tesAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAt!\n");
         if(currentOperation_ < operations_.size() - 1)
         {
             currentOperation_++; // next operation in the list
