@@ -16,7 +16,7 @@ Program::~Program()
 }
 
 void Program::add_operation( const std::string &operationString,
-                            int hardwareCycleTime )
+                             int hardwareCycleTime )
 {
     // Operation format is "S(start)0"
 

@@ -449,37 +449,10 @@ void Simulator::displayErrorMessage( const string &message ) const
 
 void Simulator::executeFIFOP()
 {
-    while(!programs_.empty())
-    {
-        displayLoadProcessText();
-        programs_.front().run();
-        for( auto operation : programs_.front().operations() )
-        {
-            handleOperation( operation );
-        }
-
-        displayRemoveProcessText();
-        programs_.front().exit();
-        programs_.pop_front();
-    }
 }
 
 void Simulator::executeRR()
 {
-    // Same as FCFS except the programs are
-    // sorted by their duration in the PCB
-
-    // Declare how we will sort the programs
-    auto SortByDuration =
-    []( const Program &program_1, const Program &program_2 ) -> bool
-    {
-        return ( program_1.duration() < program_2.duration() );
-    };
-
-    // Execute the sort in place
-    programs_.sort( SortByDuration );
-
-    // Execute in order
 }
 
 void Simulator::displayLoadProcessText()
