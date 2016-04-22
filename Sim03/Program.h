@@ -1,7 +1,7 @@
 #ifndef PROGRAM_H_
 #define PROGRAM_H_
 
-#include <list>
+#include <vector>
 #include <string>
 #include <memory>
 #include "Operation.h"
@@ -36,21 +36,24 @@ class Program
         int operations_left() const;
         PCB process_control_block() const;
 
+        void assign_pid(int pid);
+
         void add_operation( const std::string &operationString,
                            int hardwareCycleTime );
 
         void clear_operations();
 
-        std::list<Operation> operations();
+        std::vector<Operation> operations();
 
-        Operation step(); // Steps current operation, returns info about the operation
+        // Steps current operation, returns info about the operation
+        Operation step();
 
         bool operator>(const Program &other) const;
 
     private:
 
-        std::list<Operation> operations_;
-        std::list<Operation>::iterator currentOperation_;
+        std::vector<Operation> operations_;
+        unsigned int currentOperation_;
 
         PCB processControlBlock;
 };

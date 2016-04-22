@@ -295,7 +295,6 @@ void Simulator::run()
     // Begin the simulation
     initialTime_ = chrono::high_resolution_clock::now();
     display( "Simulator program starting" );
-    display( "OS: preparing all processes" );
 
     // Execute all operations in the queue
     switch( configurationData.schedulingCode )
@@ -442,8 +441,11 @@ Program Simulator::next(RR_Q* readyQueue)
 
 void Simulator::executeRR()
 {
+    int counter = 0;
+
     // Create a ready queue
-    std::unique_ptr<RR_Q> readyQueue(new RR_Q);
+    display( "OS: preparing all processes" );
+    RR_Q* readyQueue = new RR_Q();
     for( Program program : programs_ )
     {
         program.prepare();
@@ -473,7 +475,12 @@ void Simulator::executeRR()
         if( !readyQueue->empty() )
         {
             display( "OS: selecting next process" );
-            Program program = next(readyQueue.get());
+            Program program = next(readyQueue);
+
+            if( program.process_control_block().processID == 0)
+            {
+                program.assign_pid(++counter);
+            }
 
             // Execute the program until it is interupted
             executeProgram(&program);

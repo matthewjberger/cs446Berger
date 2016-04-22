@@ -8,7 +8,7 @@ Program::Program()
     processControlBlock.remainingTime  = 0;
     processControlBlock.completed = false;
 
-    currentOperation_ = operations_.begin();
+    currentOperation_ = 0;
 }
 
 Program::~Program()
@@ -53,14 +53,15 @@ void Program::add_operation( const std::string &operationString,
 
 void Program::clear_operations()
 {
-    if(!operations_.empty())
+    while(!operations_.empty())
     {
-        operations_.clear();
-        currentOperation_ = operations_.begin();
+        operations_.pop_back();
     }
+
+    currentOperation_ = 0;
 }
 
-std::list<Operation> Program::operations()
+std::vector<Operation> Program::operations()
 {
     return operations_;
 }
@@ -99,9 +100,10 @@ int Program::operations_left() const
 
 Operation Program::step()
 {
-    if(!currentOperation_->completed())
+    Operation operation = operations_[currentOperation_];
+    if(operation.completed())
     {
-        if(currentOperation_ != operations_.end())
+        if(currentOperation_ < operations_.size() - 1)
         {
             currentOperation_++; // next operation in the list
         }
@@ -111,12 +113,17 @@ Operation Program::step()
         }
     }
 
-    currentOperation_->step();
-    return *currentOperation_;
+    operation.step();
+    return operation;
 }
 
 PCB Program::process_control_block() const
 {
     return processControlBlock;
+}
+
+void Program::assign_pid(int pid)
+{
+    processControlBlock.processID = pid;
 }
 
