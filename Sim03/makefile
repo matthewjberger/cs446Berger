@@ -6,7 +6,7 @@
 .SILENT:
 
 # Executable name
-EXE_NAME = sim02
+EXE_NAME = sim03
 
 # Compiler flags
 COMPILER_FLAGS = -c -std=c++11 -g -Wall
