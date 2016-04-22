@@ -5,40 +5,13 @@
 #include <string>
 #include <memory>
 #include <list>
+#include "Operation.h"
 
 enum States
 {
-    NEW       = 0,
-    READY     = 1,
-    WAITING   = 2,
-    RUNNING   = 3,
-    SUSPENDED = 4,
-    EXIT      = 5
+    NEW, READY, RUNNING, WAITING, EXIT
 };
 
-class Operation
-{
-    public:
-
-        Operation( const char id,
-                   const std::string &description,
-                   const int duration  );
-
-        char id() const;
-        std::string description() const;
-        int duration() const;
-
-    private:
-
-        // S, A, P, I, O
-        char id_;
-
-        // start, end, run, hard drive, keyboard, printer, monitor
-        std::string description_;
-
-        // The amount of time the operation takes to complete
-        int duration_;
-};
 
 class Program
 {
@@ -47,9 +20,10 @@ class Program
         Program();
         ~Program();
 
-        void run();
-        void exit();
         void prepare();
+        void run();
+        void suspend();
+        void exit();
         void addOperation( const std::string &operationString,
                            int hardwareCycleTime );
         void clearOperations();

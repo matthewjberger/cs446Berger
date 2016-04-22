@@ -100,30 +100,8 @@ bool Program::operator>(const Program &other) const
     return (duration() > other.duration());
 }
 
-/****** Operation ******/
-Operation::Operation( const char id,
-                      const std::string &description,
-                      const int duration )
+void Program::suspend()
 {
-    id_          = id;
-    description_ = description;
-    duration_    = duration;
-
+    processControlBlock.state = WAITING;
 }
-
-char Operation::id() const
-{
-    return id_;
-}
-
-int Operation::duration() const
-{
-    return duration_;
-}
-
-std::string Operation::description() const
-{
-    return description_;
-}
-
 
