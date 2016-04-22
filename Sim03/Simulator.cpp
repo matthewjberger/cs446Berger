@@ -32,10 +32,6 @@ Simulator::Simulator( const string &configFile )
 
 Simulator::~Simulator()
 {
-    if( logFile_.is_open() )
-    {
-        logFile_.close();
-    }
 }
 
 void Simulator::display( const string &output )
@@ -64,7 +60,19 @@ chrono::duration<double> Simulator::secondsPassed()
 
 void Simulator::wait( int milliseconds ) const
 {
-    this_thread::sleep_for( chrono::milliseconds( milliseconds ) );
+    bool wait = true;
+
+    auto start = std::chrono::system_clock::now();
+    while(wait)
+    {
+        auto now = std::chrono::system_clock::now();
+        auto elapsed =
+            std::chrono::duration_cast<std::chrono::milliseconds>(now - start);
+        if ( elapsed.count() > milliseconds )
+        {
+            wait = false;
+        }
+    }
 }
 
 bool Simulator::parseConfigurationFile( const std::string &configFile )
